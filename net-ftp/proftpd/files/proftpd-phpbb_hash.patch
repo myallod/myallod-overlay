@@ -1,0 +1,125 @@
+diff -uNr modules.orig/mod_sql_auth_phpbb_hash.c modules/mod_sql_auth_phpbb_hash.c
+--- modules.orig/mod_sql_auth_phpbb_hash.c	1970-01-01 03:00:00.000000000 +0300
++++ modules/mod_sql_auth_phpbb_hash.c	2011-04-09 18:52:50.000000000 +0400
+@@ -0,0 +1,121 @@
++#include "conf.h"
++#include "mod_sql.h"
++
++#define MOD_SQL_AUTH_PHPBB_HASH_VERSION "mod_phpbb_hash/0.1"
++
++#if defined(HAVE_OPENSSL) || defined(PR_USE_OPENSSL)
++
++#include <openssl/md5.h>
++
++int checkpassword(unsigned char *password, unsigned char *inputhash) {
++	unsigned char itoa64[65] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
++	unsigned char output[35] = {0};
++	unsigned char hash[35] = {0};
++	strcpy(hash, inputhash);
++/*	sql_log(DEBUG_INFO, "in function checkpassword: pw=%s, hash=%s", password, inputhash); */
++ 
++	// Check for correct hash
++	if(memcmp(inputhash, "$H$", 3) != 0 && strlen(inputhash) == 34) {
++		return 0;
++	}
++ 
++	unsigned int count_log2 =(unsigned char*)strchr(itoa64, hash[3]) - itoa64;
++ 
++	if(count_log2 < 7 || count_log2 > 30) {
++		return 0;
++	}
++ 
++	unsigned int count = 1 << count_log2;
++	unsigned char salt[9] = {0};
++	strncpy(salt, hash+4, 8);
++ 
++	if(strlen(salt) != 8) {
++		return 0;
++	}
++ 
++	unsigned char tobehashed[4096];
++	strcpy(tobehashed, salt);
++	strcat(tobehashed, password);
++	MD5(tobehashed, strlen(password)+strlen(salt), hash);
++	do {
++		memcpy(tobehashed, hash, 16);
++		strcpy(tobehashed+16, password);
++		MD5(tobehashed, strlen(password)+16, hash);
++	}
++	while(--count);
++ 
++	strncpy(output, inputhash, 12);
++	_hash_encode64(hash, 16, output+12);
++ 
++	return(memcmp(inputhash, output, 34) == 0);
++}
++ 
++ 
++void _hash_encode64(unsigned char *input, unsigned int count, unsigned char *output) {
++	unsigned char itoa64[65] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
++	unsigned int i = 0;
++	unsigned int value;
++ 
++	do {
++		value = input[i++];
++		*(output++) = itoa64[value & 0x3f];
++ 
++		if(i < count) {
++			value |= input[i] << 8;
++		}
++ 
++		*(output++) = itoa64[(value >> 6) & 0x3f];
++ 
++		if(i++ >= count) {
++			break;
++		}
++		if(i < count) {
++			value |= input[i] << 16;
++		}
++ 
++		*(output++) = itoa64[(value >> 12) & 0x3f];
++ 
++		if(i++ >= count) {
++			break;
++		}
++ 
++		*(output++) = itoa64[(value >> 18) & 0x3f];
++	}
++	while (i < count);
++}
++
++
++
++static modret_t *auth_phpbb_hash(cmd_rec *cmd, const char *c_clear, const char *c_hash) {
++/*	sql_log(DEBUG_INFO, "in function auth_phpbb_hash: c_clear=%s, c_hash=%s", c_clear, c_hash); */
++	return (checkpassword(c_clear, c_hash) == 0) ? ERROR_INT(cmd, PR_AUTH_BADPWD) : HANDLED(cmd);
++}
++
++static int sql_auth_phpbb_hash_init(void) {
++	(void) sql_register_authtype("PHPBBHASH", auth_phpbb_hash);
++	return 0;
++}
++
++#endif
++
++module sql_auth_phpbb_hash_module = {
++/* Always NULL */
++NULL, NULL,
++/* Module API version */
++0x20,
++/* Module name */
++"sql_auth_phpbb_hash",
++/* Module configuration directive table */
++NULL,
++/* Module command handler table */
++NULL,
++/* Module auth handler table */
++NULL,
++/* Module initialization */
++sql_auth_phpbb_hash_init,
++/* Session initialization */
++NULL,
++/* Module Version */
++MOD_SQL_AUTH_PHPBB_HASH_VERSION
++};
++
