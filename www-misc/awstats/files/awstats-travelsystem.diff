@@ -1,0 +1,276 @@
+--- awstats.orig/wwwroot/cgi-bin/awstats.pl	2013-09-25 14:50:40.069079621 +0400
++++ awstats/wwwroot/cgi-bin/awstats.pl	2013-09-25 14:51:31.001290632 +0400
+@@ -18691,27 +18691,27 @@
+ 							}
+ 						}
+ 					}
+-					else {
+-						my $uarobot = 'no_user_agent';
++					#else {
++					#	my $uarobot = 'no_user_agent';
+ 
+ 						# It's a robot or at least a bad browser, we stop here
+-						if ($Debug) {
+-							debug(
+-"  UserAgent not defined so it should be a robot, saved as robot 'no_user_agent'",
+-								2
+-							);
+-						}
+-						$_robot_h{$uarobot}++;
+-						if ($pos_size>0){$_robot_k{$uarobot} += int( $field[$pos_size] );}
+-						$_robot_l{$uarobot} = $timerecord;
+-						if ( $urlwithnoquery =~ /$regrobot/o ) {
+-							$_robot_r{$uarobot}++;
+-						}
+-						$countedtraffic = 4;
+-						if ($PageBool) { $_time_nv_p[$hourrecord]++; }
+-						$_time_nv_h[$hourrecord]++;
+-						if ($pos_size>0){$_time_nv_k[$hourrecord] += int( $field[$pos_size] );}
+-					}
++					#	if ($Debug) {
++					#		debug(
++#"  UserAgent not defined so it should be a robot, saved as robot 'no_user_agent'",
++					#			2
++					#		);
++					#	}
++					#	$_robot_h{$uarobot}++;
++					#	if ($pos_size>0){$_robot_k{$uarobot} += int( $field[$pos_size] );}
++					#	$_robot_l{$uarobot} = $timerecord;
++					#	if ( $urlwithnoquery =~ /$regrobot/o ) {
++					#		$_robot_r{$uarobot}++;
++					#	}
++					#	$countedtraffic = 4;
++					#	if ($PageBool) { $_time_nv_p[$hourrecord]++; }
++					#	$_time_nv_h[$hourrecord]++;
++					#	if ($pos_size>0){$_time_nv_k[$hourrecord] += int( $field[$pos_size] );}
++					#}
+ 				}
+ 			}
+ 		}
+--- awstats.orig/wwwroot/cgi-bin/lib/browsers.pm	2013-09-25 17:05:06.044966289 +0400
++++ awstats/wwwroot/cgi-bin/lib/browsers.pm	2013-09-25 17:09:06.315439206 +0400
+@@ -235,6 +235,7 @@
+ 'fdm',
+ 'javaws',
+ 'wget',
++'tpparser',
+ 'fget',
+ 'chilkat',
+ 'webdownloader\sfor\sx',
+@@ -462,6 +463,7 @@
+ 'fdm','<a href="http://www.freedownloadmanager.org/" title="Browser home page [new window]" target="_blank">FDM Free Download Manager</a>',
+ 'javaws','Java Web Start',
+ 'wget','Wget',
++'tpparser', 'Travelsystem Php Parser',
+ 'fget','FGet',
+ 'chilkat', 'Chilkat',
+ 'webdownloader\sfor\sx','Downloader for X',
+@@ -499,6 +501,7 @@
+ 'httrack','1',
+ 'webreaper','1',
+ 'wget','1',
++'tpparser', '1',
+ 'fget','1',
+ 'download\smaster','1',
+ 'webdownloader\sfor\sx','1',
+--- /dev/null	2013-11-26 05:53:44.370000000 +0400
++++ awstats/wwwroot/js/day-by-day-head.js	2010-05-21 16:54:36.000000000 +0400
+@@ -0,0 +1,105 @@
++/////////////////////////////////////////////////////////////////////
++// day-by-day-head.js                                              //
++//                                                                 //
++// Copyright 2008-2010 INTERNETOFFICER SPRL.                       //
++//                                                                 //
++// InternetOfficer SPRL                                            //
++// Avenue de Meysse 115                                            //
++// 1020 Brussels                                                   //
++// Belgium                                                         //
++//                                                                 //
++// For more information and license terms, visit:                  //
++// http://www.internetofficer.com/awstats/day-by-day/              //
++//                                                                 //
++// For comments and questions, visit:                              //
++// http://www.internetofficer.com/forum/awstats-day-by-day/        //
++//                                                                 //
++/////////////////////////////////////////////////////////////////////
++
++var date_now = new Date() ;
++var this_day ;
++var month = date_now.getMonth() +1 ;
++var year = date_now.getFullYear() ;
++var databasebreak ;
++
++var awstats_url = window.location.pathname ;
++var awstats_arg = window.location.search.slice(1) ;
++var argument = awstats_arg.split("&") ;
++for (var i = 0; argument[i] != undefined ; i++) {
++	if (argument[i].slice(0,4) ==  'day=') {
++		this_day = argument[i].replace(/^day=/,'') ;
++	} else if (argument[i].slice(0,10) ==  'framename=') {
++		argument[i] = '' ;
++	} else if (argument[i].slice(0,7) ==  'output=') {
++		argument[i] = '' ;
++	} else if (argument[i].slice(0,5) == 'year=') {
++		year = argument[i].slice(5) ;
++	} else if (argument[i].slice(0,6) == 'month=') {
++		month = argument[i].slice(6) ;
++	} else if (argument[i].slice(0,14) == 'databasebreak=') {
++		databasebreak = argument[i].slice(14) ;
++		argument[i] = '' ;
++	}
++}
++
++var days_month = 31 ;
++if (month == 4 || month == 6 || month == 9 || month == 11) {
++	days_month = 30 ;
++} else if (month == 2) {
++	if (year % 4 == 0) {
++		days_month = 29 ;
++	} else {
++		days_month = 28 ;
++	}
++}
++
++document.write ('<br />') ;
++document.write ('<table class="aws_border" border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td>') ;
++document.write ('<table class="aws_data" border="0" cellpadding="1" cellspacing="0" width="100%"><tr valign="middle">') ;
++document.write ('<td class="aws" valign="middle" width="150"><b>Day of month:</b>&nbsp;</td>') ;
++var d2 ;
++for (var d = 1; d <= days_month; d++) {
++	if (d < 10) {
++		d2 = '0' + d ;
++	} else {
++		d2 = d ;
++	}
++	document.write('<td class="aws" valign="middle"><a href="' + awstats_url + '?') ;
++	for (i = 0; argument[i] != undefined ; i++) {
++		if (argument[i] != '' && argument[i].slice(0,4) != 'day=') {
++			if (i!=0) {
++				document.write ('&') ;
++			}
++			document.write (argument[i]) ;
++		} 
++	}
++	document.write ('&databasebreak=day&day=' + d2 + ' " target="_top">') ;
++	if (d == this_day) {
++		document.write ('<strong>' + d + '</strong>') ;
++	} else {
++		document.write (d) ;
++	}
++	document.write ('</a></td>') ;
++}
++for (var d = days_month + 1; d <= 31; d++) {
++	document.write('<td class="aws" valign="middle">&nbsp;</td>') ;
++}
++document.write ('</tr>') ;
++document.write ('<tr valign="middle">') ;
++document.write ('<td class="aws" valign="middle" width="150">') ;
++if (this_day != undefined) {
++	document.write ('<a href="' + awstats_url + '?') ;
++	for (i = 0; argument[i] != undefined ; i++) {
++		if (argument[i] != '' && argument[i].slice(0,4) != 'day=') {
++			if (i!=0) {
++				document.write ('&') ;
++			}
++			document.write (argument[i]) ;
++		} 
++	}
++	document.write ('" " target="_top">Back to monthly report</a><br>') ;
++}
++document.write ('</td><td>&nbsp;<br>&nbsp;</td>') ;
++document.write ('<td colspan="30" style="text-align:right;"><a href="http://www.internetofficer.com/awstats/day-by-day/" target="_top"><strong>AWStats Day by Day</strong></a> &copy;2008-2010 InternetOfficer SPRL&nbsp;</td>') ;
++document.write ('</tr></table>') ;
++document.write ('</td></tr></table>') ;
+--- /dev/null	2013-11-26 05:53:44.370000000 +0400
++++ awstats/wwwroot/js/day-by-day-end.js	2010-05-21 16:58:36.000000000 +0400
+@@ -0,0 +1,71 @@
++/////////////////////////////////////////////////////////////////////
++// day-by-day-end.js                                               //
++//                                                                 //
++// Copyright 2008-2010 INTERNETOFFICER SPRL.                       //
++//                                                                 //
++// InternetOfficer SPRL                                            //
++// Avenue de Meysse 115                                            //
++// 1020 Brussels                                                   //
++// Belgium                                                         //
++//                                                                 //
++// For more information and license terms, visit:                  //
++// http://www.internetofficer.com/awstats/day-by-day/              //
++//                                                                 //
++// For comments and questions, visit:                              //
++// http://www.internetofficer.com/forum/awstats-day-by-day/        //
++//                                                                 //
++/////////////////////////////////////////////////////////////////////
++
++if (databasebreak == 'day') {
++	var done = false ;
++	var element = document.getElementsByTagName("input") ;
++	for (var i = 0; i < element.length && !done; i++) {
++		if (element[i].className == 'aws_button') {
++			for (var j = 0; j < element[i].attributes.length; j++) {
++				if (element[i].attributes[j].nodeName.toLowerCase() == 'value') {
++					element[i].attributes[j].nodeValue = ' Disabled ' ;
++					element[i].disabled = true ;
++					done = true ;
++				}
++			}
++		}
++	}
++	
++	var element_a = document.getElementsByTagName("a") ;
++	var a_month_pointer = 0 ;
++	var a_daysofmonth_pointer = 0 ;
++	var a_daysofweek_pointer = 0 ;
++	var i2 = 0 ;
++	for (var i = 0; i < element_a.length; i++) {
++		if (element_a[i].name != '') {
++			if (element_a[i].name == 'month') {
++				a_month_pointer = i2 ;
++			} else if (element_a[i].name == 'daysofmonth') {
++				a_daysofmonth_pointer = i2 ;
++			} else if (element_a[i].name == 'daysofweek') {
++				a_daysofweek_pointer = i2 ;
++			}
++			i2++ ;
++		}
++	}
++
++	var element_table = document.getElementsByTagName("table") ;
++	var table_pointer = new Array() ;
++	var j2 = 0 ;
++	for (var j = 0; j < element_table.length; j++) {
++		if (element_table[j].className == 'aws_border sortable') {
++			table_pointer[j2] = j ;
++			j2++ ;
++		}
++	}
++
++	if (a_month_pointer > 0) {
++		element_table[table_pointer[a_month_pointer-1]].style.display = 'none' ;
++	}
++	if (a_daysofmonth_pointer > 0) {
++		element_table[table_pointer[a_daysofmonth_pointer-2]].style.display = 'none' ;
++	}
++	if (a_daysofweek_pointer > 0) {
++		element_table[table_pointer[a_daysofweek_pointer-2]].style.display = 'none' ;
++	}
++}
+--- awstats.orig/wwwroot/cgi-bin/awstats.model.conf	2013-12-01 10:27:51.112039868 +0400
++++ awstats/wwwroot/cgi-bin/awstats.model.conf	2013-12-01 10:00:13.620936127 +0400
+@@ -1208,14 +1208,14 @@
+ # You can enter HTML code that will be added at the top of AWStats reports.
+ # Default: ""
+ #
+-HTMLHeadSection=""
++HTMLHeadSection="<script language=javascript src="/awstats/js/day-by-day-head.js"></script>"
+ 
+ 
+ # You can enter HTML code that will be added at the end of AWStats reports.
+ # Great to add advert ban.
+ # Default: ""
+ #
+-HTMLEndSection=""
++HTMLEndSection="<script language=javascript src="/awstats/js/day-by-day-end.js"></script>"
+ 
+ 
+ # By default AWStats page contains meta tag robots=noindex,nofollow
