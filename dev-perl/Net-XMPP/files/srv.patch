@@ -1,0 +1,16 @@
+http://xgu.ru/wiki/Jabber
+
+--- Net-XMPP-1.02/lib/Net/XMPP/Connection.pm
++++ Net-XMPP-1.02/lib/Net/XMPP/Connection.pm
+@@ -141,9 +141,8 @@
+                     connectiontype => $self->{SERVER}->{connectiontype},
+                     timeout        => $self->{SERVER}->{timeout},
+                     ssl            => $self->{SERVER}->{ssl}, #LEGACY
+-                    (defined($self->{SERVER}->{componentname}) ?
+-                     (to => $self->{SERVER}->{componentname}) :
+-                     ()
++                    srv            => '_xmpp-client._tcp',
++                    to             => $self->{SERVER}->{hostname}, (defined($self->{SERVER}->{componentname}) ?  (to => $self->{SERVER}->{componentname}) : ()
+                     ),
+                    );
+ 
