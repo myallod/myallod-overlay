@@ -1,6 +1,6 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-apps/drupal/drupal-6.28.ebuild,v 1.1 2013/01/17 08:49:49 radhermit Exp $
+# $Header: /var/cvsroot/gentoo-x86/www-apps/drupal/drupal-7.29.ebuild,v 1.1 2014/07/27 17:15:02 akireev Exp $
 
 EAPI=5
 
@@ -14,24 +14,52 @@ SRC_URI="http://drupal.org/files/projects/${P}.tar.gz"
 
 LICENSE="GPL-2"
 KEYWORDS="~alpha ~amd64 ~ppc ~x86"
-IUSE="+mysql postgres"
+IUSE="+accelerator +mysql postgres sqlite +uploadprogress"
 
-RDEPEND="virtual/httpd-php
-	dev-lang/php[gd,pdo,postgres?,xml]
-	mysql? ( || ( dev-lang/php[mysql] dev-lang/php[mysqli] ) )"
+RDEPEND="
+	dev-lang/php[gd,hash,pdo,postgres?,simplexml,xml]
+	virtual/httpd-php
+	accelerator? ( ||
+		(
+			(
+				<dev-lang/php-5.5
+				dev-php/pecl-apc
+			)
+			dev-php/xcache
+			dev-php/eaccelerator
+			(
+				>=dev-lang/php-5.5[opcache]
+				dev-php/pecl-apcu
+			)
+		)
+	)
+	uploadprogress? ( dev-php/pecl-uploadprogress )
+	mysql? (
+		|| (
+			dev-lang/php[mysql]
+			dev-lang/php[mysqli]
+		)
+	)
+	sqlite? (
+		|| (
+			dev-lang/php[sqlite]
+			dev-lang/php[sqlite3]
+		)
+	)
+"
 
 need_httpd_cgi
 
-REQUIRED_USE="|| ( mysql postgres )"
+REQUIRED_USE="|| ( mysql postgres sqlite )"
 
 src_install() {
 	webapp_src_preinst
 
-	local docs="MAINTAINERS.txt LICENSE.txt INSTALL.txt CHANGELOG.txt INSTALL.mysql.txt INSTALL.pgsql.txt UPGRADE.txt "
+	local docs="MAINTAINERS.txt LICENSE.txt INSTALL.txt CHANGELOG.txt INSTALL.mysql.txt INSTALL.pgsql.txt INSTALL.sqlite.txt UPGRADE.txt "
 	dodoc ${docs}
-	rm -f ${docs} INSTALL COPYRIGHT.txt
+	rm -f ${docs} INSTALL COPYRIGHT.txt || die
 
-	cp sites/default/{default.settings.php,settings.php}
+	cp sites/default/{default.settings.php,settings.php} || die
 	insinto "${MY_HTDOCSDIR}"
 	doins -r .
 
@@ -49,9 +77,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	ewarn
+	echo
 	ewarn "SECURITY NOTICE"
 	ewarn "If you plan on using SSL on your Drupal site, please consult the postinstall information:"
 	ewarn "\t# webapp-config --show-postinst ${PN} ${PV}"
-	ewarn
+	echo
 }
