@@ -21,7 +21,7 @@ DEPEND="virtual/perl-Module-Build
 	${RDEPEND}"
 
 SRC_TEST="do"
-PATCHES=( "${FILESDIR}"/1.02-defined.patch  "${FILESDIR}"/srv.patch )
+PATCHES=( "${FILESDIR}"/1.02-defined.patch "${FILESDIR}"/1.02-protect.patch  "${FILESDIR}"/srv.patch )
 
 src_prepare() {
 	for i in 2_client_jabberd1.4.t 3_client_jabberd2.t ; do
