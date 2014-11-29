@@ -23,4 +23,4 @@ RDEPEND="dev-perl/Authen-SASL
 
 SRC_TEST="online"
 
-PATCHES=( "${FILESDIR}"/dns.patch )
+PATCHES=( "${FILESDIR}"/dns.patch "${FILESDIR}"/warning.patch )
