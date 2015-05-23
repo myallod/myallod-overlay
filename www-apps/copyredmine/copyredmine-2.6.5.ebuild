@@ -30,7 +30,7 @@ ruby_add_rdepend "
 RDEPEND="
 	${RDEPEND}
 	imagemagick? ( media-gfx/imagemagick )
-	postgres? ( dev-db/postgresql-base )
+	postgres? ( dev-db/postgresql )
 	sqlite3? ( dev-db/sqlite:3 )
 	mysql? ( virtual/mysql )
 	bazaar? ( dev-vcs/bzr )
@@ -44,14 +44,12 @@ RDEPEND="
 REDMINE_DIR="${REDMINE_DIR:-/var/lib/${PN}}"
 
 src_unpack() {
-       if [ "${A}" != "" ]; then
-               unpack ${A}
-               mkdir all
-               mv redmine-${PV} all/copyredmine-${PV}
-       fi
+	if [ "${A}" != "" ]; then
+		unpack ${A}
+		mkdir all
+		mv redmine-${PV} all/copyredmine-${PV}
+	fi
 }
-
-
 
 pkg_setup() {
 	enewgroup "${HTTPD_GROUP:-redmine}"
@@ -104,6 +102,16 @@ all_ruby_install() {
 		"${REDMINE_DIR}/tmp" \
 		/var/log/${PN} || die
 
+	if use passenger ; then
+		has_apache
+		if [[ $APACHE_VERSION -gt 0 ]]; then
+			insinto "${APACHE_VHOSTS_CONFDIR}"
+			doins "${FILESDIR}/10_redmine_vhost.conf" || die
+		fi
+	else
+		newconfd "${FILESDIR}/${PN}.confd" ${PN} || die
+		newinitd "${FILESDIR}/${PN}.initd" ${PN} || die
+	fi
 	doenvd "${T}/50${PN}" || die
 }
 
