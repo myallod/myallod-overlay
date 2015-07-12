@@ -12,7 +12,7 @@ DOCS="CHANGELOG INSTALL NOTICE TECHNOTES.txt TODO"
 
 PHP_EXT_INIFILE="${PN}.ini"
 
-USE_PHP="php5-3"
+USE_PHP="php5-2 php5-3"
 
 inherit php-ext-pecl-r2 confutils eutils
 
