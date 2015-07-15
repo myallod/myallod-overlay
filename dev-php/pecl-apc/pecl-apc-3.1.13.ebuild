@@ -26,9 +26,8 @@ IUSE="mmap"
 DEPEND="
 	!dev-php/eaccelerator
 	!dev-php/xcache
-	!dev-php/pecl-apcu
 	!dev-php/pecl-zendopcache
-	dev-lang/php[-opcache(-)]"
+	"
 RDEPEND="${DEPEND}"
 
 LOCKS="pthreadmutex pthreadrw spinlock semaphore"
