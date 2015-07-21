@@ -1,0 +1,20 @@
+#https://wiki.archlinux.org/index.php/RTorrent
+
+/etc/systemd/system/rtorrent.service
+
+[Unit]
+Description=rTorrent Daemon
+After=network.target
+
+[Service]
+Type=forking
+KillMode=none
+User=rtorrent
+ExecStart=/usr/bin/tmux new-session -c /mnt/storage/rtorrent -s rtorrent -n rtorrent -d rtorrent
+ExecStop=/usr/bin/tmux send-keys -t rtorrent C-q && /usr/bin/tmux kill-session -t rtorrent
+WorkingDirectory=/home/rtorrent/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

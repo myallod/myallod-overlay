@@ -1,0 +1,19 @@
+#https://wiki.archlinux.org/index.php/RTorrent
+
+/etc/systemd/system/rt@.service
+
+[Unit]
+Description=rTorrent
+After=network.target
+
+[Service]
+Type=forking
+KillMode=none
+User=%I
+ExecStart=/usr/bin/screen -d -m -fa -S rtorrent /usr/bin/rtorrent
+ExecStop=/usr/bin/killall -w -s 2 /usr/bin/rtorrent
+WorkingDirectory=/home/%I/
+
+[Install]
+WantedBy=multi-user.target
+

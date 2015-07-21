@@ -1,0 +1,19 @@
+# https://wiki.archlinux.org/index.php/RTorrenthttps://wiki.archlinux.org/index.php/RTorrent
+/etc/systemd/system/rt@.service
+
+[Unit]
+Description=rTorrent
+After=network.target
+
+[Service]
+Type=forking
+KillMode=none
+User=%I
+ExecStart=/usr/bin/tmux new-session -s rt -n rtorrent -d rtorrent
+ ExecStop=/usr/bin/bash -c "/usr/bin/tmux send-keys -t rt:rtorrent C-q && while pidof rtorrent > /dev/null; do sleep 0.5; echo rtorrent still running...; done"
+WorkingDirectory=/home/%I/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

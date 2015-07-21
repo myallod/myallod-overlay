@@ -798,7 +798,7 @@ pkg_postinst() {
 	done
 
 	elog "Make sure that PHP_TARGETS in /etc/portage/make.conf includes php${SLOT/./-} in order"
-	elog "to compile extensions for the ${SLOT} ABI (ex: pecl-apc version 3.1.13"
+	elog "to compile extensions for the ${SLOT} ABI (ex: pecl-apc version 3.1.13)"
 	elog "If emerge --info hasn't show PHP TARGET ${SLOT} because it is masked in /usr/portage/profiles/base/use.mask"
 	elog "you should add -php_targets_php5-3 to file /etc/portage/profile/use.mask"
 	elog
