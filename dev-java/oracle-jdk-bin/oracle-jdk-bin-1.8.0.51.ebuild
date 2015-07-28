@@ -9,6 +9,7 @@ inherit eutils java-vm-2 prefix versionator
 # This URIs need to be updated when bumping!
 JDK_URI="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
 JCE_URI="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"
+DLP="8u51-b16"
 
 # This is a list of archs supported by this update.
 # Currently arm comes and goes.
@@ -89,13 +90,22 @@ check_tarballs_available() {
 			einfo
 			einfo "Oracle requires you to download the needed files manually after"
 			einfo "accepting their license through a javascript capable web browser."
+			einfo "    ---> echo 'dev-java/oracle-jdk-bin Oracle-BCLA-JavaSE' >> /etc/portage/package.license"
 			einfo
 			_check_tarballs_available_once=1
 		fi
 		einfo "Download the following files:"
 		for dl in ${unavailable}; do
 			einfo "  ${dl}"
+			dlstring="/usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}";
+			if [ -z "${dl##*demos*}" ]; then
+				dlstring+="-demos/${dl} && chown portage:portage ${dl} && mv -i ${dl} ${DISTDIR}"
+			else
+				dlstring+="/${dl} && chown portage:portage ${dl} && mv -i ${dl} ${DISTDIR}"
+			fi
+			einfo "    ---> ${dlstring}"
 		done
+		einfo
 		einfo "at '${uri}'"
 		einfo "and move them to '${DISTDIR}'"
 		einfo
@@ -143,6 +153,7 @@ src_unpack() {
 	# to stop having to change it over and over again, just wildcard match and
 	# live a happy life instead of trying to get this new jdk1.8.0_05 to work.
 	mv "${WORKDIR}"/jdk* "${S}" || die
+
 }
 
 src_prepare() {
