@@ -14,9 +14,19 @@ SLOT="0"
 
 KEYWORDS="amd64 x86"
 
-IUSE=""
+IUSE="user-defined"
+
 
 RDEPEND="${DEPEND}"
+
+src_prepare() {
+	einfo "Remove dos symbols from yamdi.c"
+	sed -i 's///' ${WORKDIR}/${P}/yamdi.c || die "sed failed"
+	if use user-defined; then
+		einfo "Patch yamdi_user_defined_tags.patch"
+		epatch "${FILESDIR}"/yamdi_user_defined_tags.patch || die "epatch yamdi_user_defined_tags.patch failed"
+	fi
+}
 
 src_compile() {
 	emake || die "emake failed."

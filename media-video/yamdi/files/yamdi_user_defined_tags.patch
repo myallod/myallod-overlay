@@ -1,0 +1,92 @@
+#based on
+#http://sourceforge.net/p/yamdi/patches/6/
+#http://sourceforge.net/p/yamdi/patches/_discuss/thread/2e1e1143/0a5c/attachment/yamdi_user_defined_tags.patch
+
+--- yamdi.c.orig	2010-10-17 20:46:40.000000000 +0200
++++ yamdi.c		2010-10-19 11:32:34.000000000 +0200
+@@ -108,6 +108,9 @@
+ 	FLVTag_t *flvtag;
+ } FLVIndex_t;
+ 
++// max number of user defined tags
++#define MAX_USER_DEFINED       10
++
+ typedef struct {
+ 	FLVIndex_t index;
+ 
+@@ -179,6 +182,8 @@
+ 
+ 	struct {
+ 		char creator[256];		// -c
++		char *user_defined[MAX_USER_DEFINED];   // -u
++		int user_defined_count;         // number of user defined parameters
+ 
+ 		short addonlastkeyframe;	// -k
+ 		short addonlastsecond;		// -s, -l (deprecated)
+@@ -302,8 +307,16 @@
+ 
+ 	initFLV(&flv);
+ 
+-	while((c = getopt(argc, argv, ":i:o:x:t:c:a:lskMXwh")) != -1) {
++	while((c = getopt(argc, argv, "u:i:o:x:t:c:a:lskMXwh")) != -1) {
+ 		switch(c) {
++			case 'u':
++				if(flv.options.user_defined_count + 1 == MAX_USER_DEFINED) {
++					fprintf(stderr, "ERROR: to many -a options\n");
++					exit(YAMDI_ERROR);
++				}
++				printf("Adding tag >>>%s<<<\n", optarg);
++				flv.options.user_defined[flv.options.user_defined_count++] = strdup (optarg);
++				break;
+ 			case 'i':
+ 				infile = optarg;
+ 				break;
+@@ -1139,6 +1152,7 @@
+ 
+ int createFLVEventOnMetaData(FLV_t *flv) {
+ 	int pass = 0;
++	int j;
+ 	size_t i, length = 0;
+ 	buffer_t b;
+ 
+@@ -1158,6 +1172,22 @@
+ 		writeBufferFLVScriptDataValueString(&b, "creator", flv->options.creator); length++;
+ 	}
+ 
++	printf("Adding %d user defined tags\n", flv->options.user_defined_count);
++	for(j = 0; j < flv->options.user_defined_count; j++) {
++		char *key = strdup (flv->options.user_defined[j]);
++		char *value = strchr(key, '=');
++		if(value != NULL) {
++			*value++ = 0;
++			printf("Adding tag #%d %s=%s\n", j, key, value);
++			writeBufferFLVScriptDataValueString(&b, key, value);
++			length++;
++		}
++		else {
++			fprintf(stderr, "ERROR: Invalid key value pair: >>>%s<<<\n", key);
++		}
++		free(key);
++	} 
++
+ 	writeBufferFLVScriptDataValueString(&b, "metadatacreator", "Yet Another Metadata Injector for FLV - Version " YAMDI_VERSION "\0"); length++;
+ 	writeBufferFLVScriptDataValueBool(&b, "hasKeyframes", flv->haskeyframes); length++;
+ 	writeBufferFLVScriptDataValueBool(&b, "hasVideo", flv->hasvideo); length++;
+@@ -2361,7 +2361,7 @@
+ 
+ 	fprintf(stderr, "SYNOPSIS\n");
+ 	fprintf(stderr, "\tyamdi -i input file [-x xml file | -o output file [-x xml file]]\n");
+-	fprintf(stderr, "\t      [-t temporary file] [-c creator] [-a interval] [-skMXw] [-h]\n");
++	fprintf(stderr, "\t      [-t temporary file] [-c creator] [-a interval] [-skMXw] [-h] [-u 'tagname=tagvalue' [tagname=tagvalue] ... ]\n");
+ 	fprintf(stderr, "\n");
+ 
+ 	fprintf(stderr, "DESCRIPTION\n");
+@@ -2408,6 +2408,8 @@
+ 	fprintf(stderr, "\t\trequired to be different files otherwise this option will be\n");
+ 	fprintf(stderr, "\t\tignored.\n");
+ 	fprintf(stderr, "\n");
++	fprintf(stderr, "\t-u 'name=value'\tAdd user tag name: value to metadata. Up to 10 tags.\n");
++	fprintf(stderr, "\n");
+ 	fprintf(stderr, "\t-h\tThis description.\n");
+ 	fprintf(stderr, "\n");
+ 
