@@ -32,7 +32,9 @@ pkg_nofetch() {
 	einfo "Please download ${ORIG_NAME} from "
 	einfo "${DOWNLOAD_URL}"
 	einfo "(agree to the license) and place it in ${DISTDIR}"
-
+	einfo
+	einfo "    ---> /usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/8u51-b16/${ORIG_NAME} && chown portage:portage ${ORIG_NAME} && mv -i ${ORIG_NAME} ${DISTDIR}"
+	einfo
 	einfo "If you find the file on the download page replaced with a higher"
 	einfo "version, please report to the bug 67266 (link below)."
 	einfo "If emerge fails because of a checksum error it is possible that"
