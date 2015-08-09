@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-apps/drupal/drupal-6.33.ebuild,v 1.1 2014/08/14 12:59:01 jmbsvicetto Exp $
+# $Header: /var/cvsroot/gentoo-x86/www-apps/drupal/drupal-6.36.ebuild,v 1.1 2015/06/18 13:54:33 jmbsvicetto Exp $
 
 EAPI=5
 
@@ -16,9 +16,15 @@ LICENSE="GPL-2"
 KEYWORDS="~alpha ~amd64 ~ppc ~x86"
 IUSE="+mysql postgres"
 
-RDEPEND="virtual/httpd-php
+RDEPEND="
 	dev-lang/php[gd,pdo,postgres?,xml]
-	mysql? ( || ( dev-lang/php[mysql] dev-lang/php[mysqli] ) )"
+	virtual/httpd-php
+	mysql? (
+		|| (
+			dev-lang/php[mysql]
+			dev-lang/php[mysqli]
+		)
+	)"
 
 need_httpd_cgi
 
