@@ -34,11 +34,11 @@ DOCS=( doc/rtorrent.rc )
 src_prepare() {
 	# bug #358271
 	epatch \
-		"${FILESDIR}"/${PN}-0.9.1-ncurses.patch \
+		"${FILESDIR}"/${P}-ncurses.patch \
 		"${FILESDIR}"/${P}-tinfo.patch
 	
 	if use color; then
-		epatch "${FILESDIR}"/${P}_color.patch
+		epatch "${FILESDIR}"/${P}-color.patch
 	fi
 
 	# upstream forgot to include
