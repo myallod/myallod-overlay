@@ -8,11 +8,11 @@
 
 EAPI="5"
 
-inherit eutils flag-o-matic kde4-base wxwidgets git-2
+inherit user flag-o-matic kde4-base wxwidgets git-r3
 
 DESCRIPTION="aMule, the all-platform eMule p2p client"
 HOMEPAGE="http://www.amule.org/"
-EGIT_REPO_URI="git://repo.or.cz/amule.git"
+EGIT_REPO_URI="https://github.com/amule-project/amule.git"
 EGIT_BRANCH="master"
 
 LICENSE="GPL-2"
@@ -25,6 +25,8 @@ RESTRICT="nomirror"
 DEPEND="=x11-libs/wxGTK-2.8.12*
 	>=dev-libs/crypto++-5
 	>=sys-libs/zlib-1.2.1
+	sys-devel/autoconf
+	>=sys-devel/automake-1.9
 	asio? ( dev-libs/boost )
 	stats? ( >=media-libs/gd-2.0.26[jpeg] )
 	geoip? ( dev-libs/geoip )
@@ -87,6 +89,8 @@ src_configure() {
 			--disable-wxcas
 			--disable-alc"
 	fi
+
+	bash autogen.sh
 
 	econf \
 		--with-wx-config=${WX_CONFIG} \
