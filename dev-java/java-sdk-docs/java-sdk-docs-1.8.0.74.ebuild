@@ -22,7 +22,8 @@ SLOT="1.8"
 KEYWORDS="amd64 ~arm ~ppc64 x86 ~amd64-linux ~x86-linux"
 RESTRICT="fetch"
 #DLP="8u51-b16"
-DLP="8u72-b15"
+#DLP="8u72-b15"
+DLP="8u74-b02"
 
 
 DEPEND="app-arch/unzip"

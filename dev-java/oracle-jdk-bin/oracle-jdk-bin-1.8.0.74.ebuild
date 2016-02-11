@@ -10,7 +10,8 @@ inherit eutils java-vm-2 prefix versionator
 JDK_URI="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
 JCE_URI="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"
 #DLP="8u51-b16"
-DLP="8u72-b15"
+#DLP="8u72-b15"
+DLP="8u74-b02"
 
 # This is a list of archs supported by this update.
 # Currently arm comes and goes.
