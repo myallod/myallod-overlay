@@ -1,0 +1,21 @@
+To complete the install:
+
+1) Use a web browser to visit http://${VHOST_HOSTNAME}${VHOST_APPDIR}
+   and follow the instructions in the installation wizard to complete the installation.
+   
+   Recommended PHP settings to check before configuring:
+   
+   magic_quotes_runtime Off
+   safe_mode Off
+   file_uploads On
+
+2) After the configuration is finished, do not forget to change the permissions
+   on ${MY_INSTALLDIR}/config.inc.php to safer ones so that the file is not writeable
+   by your webserver!
+
+3) Use cron to run the scripts/maintenance/maintenance.php
+   script, with the domain of your site as a parameter, every hour, eg:
+
+   0 * * * * /usr/bin/php -q ${MY_INSTALLDIR}/scripts/maintenance/maintenance.php ${VHOST_HOSTNAME}
+
+See http://www.openx.org/support/documentation for detailed documentation.
