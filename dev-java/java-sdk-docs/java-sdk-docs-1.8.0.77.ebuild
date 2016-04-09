@@ -21,9 +21,8 @@ LICENSE="oracle-java-documentation-8"
 SLOT="1.8"
 KEYWORDS="amd64 ~arm ~ppc64 x86 ~amd64-linux ~x86-linux"
 RESTRICT="fetch"
-#DLP="8u51-b16"
-#DLP="8u72-b15"
-DLP="8u74-b02"
+#DLP=("8u51-b16" "8u72-b15" "8u74-b02")
+DLP=8u77-b03
 
 
 DEPEND="app-arch/unzip"
