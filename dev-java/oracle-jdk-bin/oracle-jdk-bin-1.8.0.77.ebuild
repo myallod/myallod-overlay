@@ -9,17 +9,17 @@ inherit eutils java-vm-2 prefix versionator
 # This URIs need to be updated when bumping!
 JDK_URI="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
 JCE_URI="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"
-#DLP="8u51-b16"
-#DLP="8u72-b15"
-DLP="8u74-b02"
+
+#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u74-b02")
+DLP="8u77-b03"
 
 # This is a list of archs supported by this update.
 # Currently arm comes and goes.
-AT_AVAILABLE=( amd64 x86 x64-solaris sparc64-solaris x64-macos )
+AT_AVAILABLE=( amd64 arm arm64 x86 x64-solaris sparc64-solaris x64-macos )
 
 # Sometimes some or all of the demos are missing, this is to not have to rewrite half
 # the ebuild when it happens.
-DEMOS_AVAILABLE=( amd64 x86 x64-solaris sparc64-solaris x64-macos )
+DEMOS_AVAILABLE=( amd64 arm arm64 x86 x64-solaris sparc64-solaris x64-macos )
 
 if [[ "$(get_version_component_range 4)" == 0 ]] ; then
 	S_PV="$(get_version_component_range 1-3)"
@@ -63,7 +63,7 @@ SRC_URI+=" jce? ( ${JCE_FILE} )"
 
 LICENSE="Oracle-BCLA-JavaSE examples? ( BSD )"
 SLOT="1.8"
-KEYWORDS="amd64 x86 ~amd64-linux ~x86-linux ~x64-macos ~sparc64-solaris ~x64-solaris"
+KEYWORDS="amd64 ~arm ~arm64 x86 ~amd64-linux ~x86-linux ~x64-macos ~sparc64-solaris ~x64-solaris"
 IUSE="alsa cups derby doc examples +fontconfig headless-awt javafx jce nsplugin pax_kernel selinux source"
 REQUIRED_USE="javafx? ( alsa fontconfig )"
 
@@ -147,9 +147,6 @@ check_tarballs_available() {
 			einfo "    ---> ${dlstring}"
 		done
 
-#JSEDK="jdk-8u72-linux-i586.tar.gz"; /usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/8u72-b15/${JSEDK} && chown portage:portage ${JSEDK} && mv -i ${JSEDK} /usr/portage/distfiles
-#JSEDEMOS="jdk-8u72-linux-i586-demos.tar.gz"; /usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/8u72-b15-demos/${DEMOS} && chown portage:portage ${DEMOS} && mv -i ${DEMOS} /usr/portage/distfiles
-
 		einfo
 		einfo "at '${uri}'"
 		einfo "and move them to '${DISTDIR}'"
@@ -163,12 +160,22 @@ check_tarballs_available() {
 }
 
 pkg_nofetch() {
+	for d in "${AT_AVAILABLE[@]}"; do
+		p=$(eval "echo \${$(echo AT_${d/-/_})}")
+		pf="${DISTDIR}/${p}"
+		test -f ${pf} || (einfo "/usr/bin/wget -O ${pf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}/${p} && chown portage:portage ${pf}")
+		if has ${d} "${DEMOS_AVAILABLE[@]}"; then
+			dem=$(eval "echo \${$(echo DEMOS_${d/-/_})}")
+			demf="${DISTDIR}/${dem}"
+			test -f ${demf} || (einfo "/usr/bin/wget -O ${demf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}-demos/${dem} && chown portage:portage ${demf}")
+		fi
+	done
+
 	local distfiles=( $(eval "echo \${$(echo AT_${ARCH/-/_})}") )
 	if use examples && has ${ARCH} "${DEMOS_AVAILABLE[@]}"; then
 		distfiles+=( $(eval "echo \${$(echo DEMOS_${ARCH/-/_})}") )
 	fi
 	check_tarballs_available "${JDK_URI}" "${distfiles[@]}"
-
 	use jce && check_tarballs_available "${JCE_URI}" "${JCE_FILE}"
 }
 
@@ -185,6 +192,7 @@ src_unpack() {
 		zcat jdk1${MY_PV%u*}0${update}.pkg/Payload | cpio -idv
 		mv Contents/Home "${WORKDIR}"/jdk${MY_PV}
 		popd > /dev/null
+		use jce && unpack "${JCE_FILE}"
 	else
 		default
 	fi
