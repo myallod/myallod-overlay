@@ -4,22 +4,23 @@
 #https://gitweb.gentoo.org/proj/webapps-experimental.git/tree/www-apps/openx/openx-2.4.4.ebuild
 
 EAPI=5
+inherit webapp versionator
 
 DESCRIPTION="Advanced web-based ad management"
 HOMEPAGE="https://www.revive-adserver.com/"
 SRC_URI="https://download.revive-adserver.com/${P}.tar.gz"
 
 LICENSE="GPL-2 LGPL-2.1"
-SLOT="0"
+SLOT="$(get_version_component_range 1-2)"
 KEYWORDS="~amd64 ~x86"
 IUSE="+gd +mysqli postgres"
 
 DEPEND="app-arch/unzip
 		virtual/cron
-		dev-lang/php[crypt,ctype,gd,session,unicode,xml,zlib]
+		>=dev-lang/php-5.5.9:*[crypt,ctype,gd,session,unicode,xml,zlib]
 		|| (
-			dev-lang/php[mysqli]
-			dev-lang/php[postgres]
+			>=dev-lang/php-5.5.9:*[mysqli]
+			>=dev-lang/php-5.5.9:*[postgres]
 		)
 		mysqli? ( virtual/mysql )
 		postgres? ( dev-db/postgresql )
@@ -27,7 +28,7 @@ DEPEND="app-arch/unzip
 		"
 RDEPEND="${DEPEND}"
 
-inherit webapp
+WEBAPP_MANUAL_SLOT="yes"
 
 need_httpd_cgi
 
