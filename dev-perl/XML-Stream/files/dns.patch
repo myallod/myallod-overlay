@@ -1,0 +1,13 @@
+http://www.ejabberd.im/node/3545
+
+--- XML-Stream/lib/XML/Stream.pm.orig
++++ XML-Stream/lib/XML/Stream.pm
+@@ -108,6 +108,7 @@
+ {
+     require Net::DNS;
+     import Net::DNS;
++    use Net::DNS;
+     $NETDNS = 1;
+ }
+ else
+

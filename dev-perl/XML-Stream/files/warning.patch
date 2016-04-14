@@ -1,0 +1,11 @@
+--- XML-Stream/lib/XML/Stream/Parser.pm.orig
++++ XML-Stream/lib/XML/Stream/Parser.pm
+@@ -68,7 +68,7 @@
+     bless($self);
+ 
+     my %args;
+-    while($#_ >= 0) { $args{ lc pop(@_) } = pop(@_); }
++    while($#_ >= 1) { $args{ lc pop(@_) } = pop(@_); }
+ 
+     $self->{PARSING} = 0;
+     $self->{DOC} = 0;
