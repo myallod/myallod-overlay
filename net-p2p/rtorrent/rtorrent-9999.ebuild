@@ -4,18 +4,19 @@
 
 EAPI=5
 
-inherit autotools eutils systemd
+inherit autotools eutils systemd git-r3
 
 DESCRIPTION="BitTorrent Client using libtorrent"
 HOMEPAGE="http://libtorrent.rakshasa.no/"
-SRC_URI="http://libtorrent.rakshasa.no/downloads/${P}.tar.gz"
+EGIT_REPO_URI="https://github.com/rakshasa/rtorrent.git"
+EGIT_BRANCH="master"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~hppa ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~x64-solaris"
 IUSE="color daemon debug ipv6 selinux test xmlrpc"
 
-COMMON_DEPEND="~net-libs/libtorrent-0.13.${PV##*.}
+COMMON_DEPEND="~net-libs/libtorrent-9999
 	dev-util/cppunit
 	>=dev-libs/libsigc++-2.2.2:2
 	>=net-misc/curl-7.19.1

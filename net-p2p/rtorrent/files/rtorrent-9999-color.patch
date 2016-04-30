@@ -1,33 +1,63 @@
-diff --git a/src/command_network.cc b/src/command_network.cc
-index c445c38..24ad5c0 100644
---- a/src/command_network.cc
-+++ b/src/command_network.cc
-@@ -241,6 +241,26 @@ initialize_command_network() {
-   CMD2_ANY         ("strings.connection_type", tr1::bind(&torrent::option_list_strings, torrent::OPTION_CONNECTION_TYPE));
-   CMD2_ANY         ("strings.encryption",      tr1::bind(&torrent::option_list_strings, torrent::OPTION_ENCRYPTION));
+#diff --git a/src/command_network.cc b/src/command_network.cc
+#index c445c38..24ad5c0 100644
+#--- a/src/command_network.cc
+#+++ b/src/command_network.cc
+#@@ -241,6 +241,26 @@ initialize_command_network() {
+#   CMD2_ANY         ("strings.connection_type", std::bind(&torrent::option_list_strings, torrent::OPTION_CONNECTION_TYPE));
+#   CMD2_ANY         ("strings.encryption",      std::bind(&torrent::option_list_strings, torrent::OPTION_ENCRYPTION));
  
-+  CMD2_ANY         ("colors.color_inactive_fg",       tr1::bind(&ui::Root::get_color_inactive_fg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_inactive_fg.set",   tr1::bind(&ui::Root::set_color_inactive_fg,   control->ui(), tr1::placeholders::_2));
-+  CMD2_ANY         ("colors.color_inactive_bg",       tr1::bind(&ui::Root::get_color_inactive_bg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_inactive_bg.set",   tr1::bind(&ui::Root::set_color_inactive_bg,   control->ui(), tr1::placeholders::_2));
+#+  CMD2_ANY         ("colors.color_inactive_fg",       std::bind(&ui::Root::get_color_inactive_fg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_inactive_fg.set",   std::bind(&ui::Root::set_color_inactive_fg,   control->ui(), std::placeholders::_2));
+#+  CMD2_ANY         ("colors.color_inactive_bg",       std::bind(&ui::Root::get_color_inactive_bg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_inactive_bg.set",   std::bind(&ui::Root::set_color_inactive_bg,   control->ui(), std::placeholders::_2));
+#+  
+#+  CMD2_ANY         ("colors.color_dead_fg",       std::bind(&ui::Root::get_color_dead_fg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_dead_fg.set",   std::bind(&ui::Root::set_color_dead_fg,   control->ui(), std::placeholders::_2));
+#+  CMD2_ANY         ("colors.color_dead_bg",       std::bind(&ui::Root::get_color_dead_bg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_dead_bg.set",   std::bind(&ui::Root::set_color_dead_bg,   control->ui(), std::placeholders::_2));
+#+
+#+  CMD2_ANY         ("colors.color_active_fg",       std::bind(&ui::Root::get_color_active_fg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_active_fg.set",   std::bind(&ui::Root::set_color_active_fg,   control->ui(), std::placeholders::_2));
+#+  CMD2_ANY         ("colors.color_active_bg",       std::bind(&ui::Root::get_color_active_bg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_active_bg.set",   std::bind(&ui::Root::set_color_active_bg,   control->ui(), std::placeholders::_2));
+#+
+#+  CMD2_ANY         ("colors.color_finished_fg",       std::bind(&ui::Root::get_color_finished_fg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_finished_fg.set",   std::bind(&ui::Root::set_color_finished_fg,   control->ui(), std::placeholders::_2));
+#+  CMD2_ANY         ("colors.color_finished_bg",       std::bind(&ui::Root::get_color_finished_bg,   control->ui()));
+#+  CMD2_ANY_VALUE_V ("colors.color_finished_bg.set",   std::bind(&ui::Root::set_color_finished_bg,   control->ui(), std::placeholders::_2));
+#+
+#   // CMD2_ANY_STRING  ("encoding_list",    std::bind(&apply_encoding_list, std::placeholders::_2));
+#   CMD2_ANY_STRING  ("encoding.add", std::bind(&apply_encoding_list, std::placeholders::_2));
+
+--- a/src/command_network.cc	2016-04-30 12:56:26.269243550 +0300
++++ b/src/command_network.cc	2016-04-30 16:06:01.109243550 +0300
+@@ -238,6 +238,26 @@
+ 
+   CMD2_ANY_STRING  ("encoding.add", std::bind(&apply_encoding_list, std::placeholders::_2));
+ 
++  CMD2_ANY         ("colors.color_inactive_fg",       std::bind(&ui::Root::get_color_inactive_fg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_inactive_fg.set",   std::bind(&ui::Root::set_color_inactive_fg,   control->ui(), std::placeholders::_2));
++  CMD2_ANY         ("colors.color_inactive_bg",       std::bind(&ui::Root::get_color_inactive_bg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_inactive_bg.set",   std::bind(&ui::Root::set_color_inactive_bg,   control->ui(), std::placeholders::_2));
 +  
-+  CMD2_ANY         ("colors.color_dead_fg",       tr1::bind(&ui::Root::get_color_dead_fg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_dead_fg.set",   tr1::bind(&ui::Root::set_color_dead_fg,   control->ui(), tr1::placeholders::_2));
-+  CMD2_ANY         ("colors.color_dead_bg",       tr1::bind(&ui::Root::get_color_dead_bg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_dead_bg.set",   tr1::bind(&ui::Root::set_color_dead_bg,   control->ui(), tr1::placeholders::_2));
++  CMD2_ANY         ("colors.color_dead_fg",       std::bind(&ui::Root::get_color_dead_fg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_dead_fg.set",   std::bind(&ui::Root::set_color_dead_fg,   control->ui(), std::placeholders::_2));
++  CMD2_ANY         ("colors.color_dead_bg",       std::bind(&ui::Root::get_color_dead_bg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_dead_bg.set",   std::bind(&ui::Root::set_color_dead_bg,   control->ui(), std::placeholders::_2));
 +
-+  CMD2_ANY         ("colors.color_active_fg",       tr1::bind(&ui::Root::get_color_active_fg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_active_fg.set",   tr1::bind(&ui::Root::set_color_active_fg,   control->ui(), tr1::placeholders::_2));
-+  CMD2_ANY         ("colors.color_active_bg",       tr1::bind(&ui::Root::get_color_active_bg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_active_bg.set",   tr1::bind(&ui::Root::set_color_active_bg,   control->ui(), tr1::placeholders::_2));
++  CMD2_ANY         ("colors.color_active_fg",       std::bind(&ui::Root::get_color_active_fg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_active_fg.set",   std::bind(&ui::Root::set_color_active_fg,   control->ui(), std::placeholders::_2));
++  CMD2_ANY         ("colors.color_active_bg",       std::bind(&ui::Root::get_color_active_bg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_active_bg.set",   std::bind(&ui::Root::set_color_active_bg,   control->ui(), std::placeholders::_2));
 +
-+  CMD2_ANY         ("colors.color_finished_fg",       tr1::bind(&ui::Root::get_color_finished_fg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_finished_fg.set",   tr1::bind(&ui::Root::set_color_finished_fg,   control->ui(), tr1::placeholders::_2));
-+  CMD2_ANY         ("colors.color_finished_bg",       tr1::bind(&ui::Root::get_color_finished_bg,   control->ui()));
-+  CMD2_ANY_VALUE_V ("colors.color_finished_bg.set",   tr1::bind(&ui::Root::set_color_finished_bg,   control->ui(), tr1::placeholders::_2));
++  CMD2_ANY         ("colors.color_finished_fg",       std::bind(&ui::Root::get_color_finished_fg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_finished_fg.set",   std::bind(&ui::Root::set_color_finished_fg,   control->ui(), std::placeholders::_2));
++  CMD2_ANY         ("colors.color_finished_bg",       std::bind(&ui::Root::get_color_finished_bg,   control->ui()));
++  CMD2_ANY_VALUE_V ("colors.color_finished_bg.set",   std::bind(&ui::Root::set_color_finished_bg,   control->ui(), std::placeholders::_2));
 +
-   // CMD2_ANY_STRING  ("encoding_list",    tr1::bind(&apply_encoding_list, tr1::placeholders::_2));
-   CMD2_ANY_STRING  ("encoding.add", tr1::bind(&apply_encoding_list, tr1::placeholders::_2));
+   // Isn't port_open used?
+   CMD2_VAR_BOOL    ("network.port_open",   true);
+   CMD2_VAR_BOOL    ("network.port_random", true);
  
 diff --git a/src/display/canvas.cc b/src/display/canvas.cc
 index 31db4ad..255e7c3 100644
