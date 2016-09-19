@@ -15,8 +15,8 @@ LICENSE="GPL-2"
 SLOT="0"
 # All db-related USEs are ineffective since we depend on rails
 # which depends on activerecord which depends on all ruby's db bindings
-IUSE="ldap openid imagemagick postgres sqlite mysql fastcgi passenger"
-#IUSE="ldap fastcgi passenger imagemagick"
+#IUSE="ldap openid imagemagick postgres sqlite mysql fastcgi passenger"
+IUSE="ldap fastcgi passenger imagemagick"
 
 ruby_add_rdepend "
 	dev-ruby/rubygems
