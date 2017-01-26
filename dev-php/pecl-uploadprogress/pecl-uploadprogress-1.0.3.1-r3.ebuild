@@ -1,12 +1,12 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/dev-php/pecl-uploadprogress/pecl-uploadprogress-1.0.3.1-r2.ebuild,v 1.1 2015/04/29 00:48:24 grknight Exp $
+# $Id$
 
-EAPI=5
+EAPI=6
 
-USE_PHP="php5-6 php5-5 php5-4"
+USE_PHP="php5-6 php7-0"
 
-inherit php-ext-pecl-r2
+inherit php-ext-pecl-r3
 
 DESCRIPTION="An extension to track progress of a file upload"
 LICENSE="PHP-3.01"
@@ -22,6 +22,8 @@ for target in ${USE_PHP}; do
 done
 
 RDEPEND="${PHPUSEDEPEND}"
+PATCHES=( "${FILESDIR}/1.0.3.1-php7.patch" )
+PHP_EXT_ECONF_ARGS=()
 
 pkg_postinst() {
 	elog "This extension is only known to work on Apache with mod_php."
