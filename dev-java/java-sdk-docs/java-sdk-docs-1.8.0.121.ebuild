@@ -1,8 +1,8 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="5"
+EAPI="6"
 
 inherit versionator
 
@@ -21,8 +21,9 @@ LICENSE="oracle-java-documentation-8"
 SLOT="1.8"
 KEYWORDS="amd64 ~arm ~ppc64 x86 ~amd64-linux ~x86-linux"
 RESTRICT="fetch"
-#DLP=("8u51-b16" "8u72-b15" "8u74-b02")
-DLP=8u77-b03
+#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u77-b03" "8u112-b15")
+DLP=8u121-b13
+DLH="e9e7ea248e2c4826b92b3f075a80e441"
 
 
 DEPEND="app-arch/unzip"
@@ -34,7 +35,7 @@ pkg_nofetch() {
 	einfo "${DOWNLOAD_URL}"
 	einfo "(agree to the license) and place it in ${DISTDIR}"
 	einfo
-	einfo "    ---> /usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}/${ORIG_NAME} && chown portage:portage ${ORIG_NAME} && mv -i ${ORIG_NAME} ${DISTDIR}"
+	einfo "    ---> /usr/bin/wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}/${DLH}/${ORIG_NAME} && chown portage:portage ${ORIG_NAME} && mv -i ${ORIG_NAME} ${DISTDIR}"
 
 	einfo "If you find the file on the download page replaced with a higher"
 	einfo "version, please report to the bug 67266 (link below)."
