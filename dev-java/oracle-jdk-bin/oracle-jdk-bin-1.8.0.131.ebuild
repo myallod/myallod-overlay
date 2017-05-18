@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -10,9 +9,10 @@ inherit eutils java-vm-2 prefix versionator
 JDK_URI="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
 JCE_URI="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"
 
-#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u74-b02" "8u77-b03""8u102-b14" "8u112-b15")
-DLP="8u121-b13"
-DLH="e9e7ea248e2c4826b92b3f075a80e441"
+#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u74-b02" "8u77-b03""8u102-b14" "8u112-b15" "8u121-b13")
+DLP="8u131-b11"
+#DLH="e9e7ea248e2c4826b92b3f075a80e441"
+DLH="d54c1d3a095b4ff2b6607d096fa80163"
 
 # This is a list of archs supported by this update.
 # Currently arm comes and goes.
@@ -65,7 +65,7 @@ SRC_URI+=" jce? ( ${JCE_FILE} )"
 LICENSE="Oracle-BCLA-JavaSE examples? ( BSD )"
 SLOT="1.8"
 KEYWORDS="amd64 ~arm ~arm64 x86 ~amd64-linux ~x86-linux ~x64-macos ~sparc64-solaris ~x64-solaris"
-IUSE="alsa commercial cups derby doc examples +fontconfig headless-awt javafx jce nsplugin selinux source"
+IUSE="alsa commercial cups derby doc examples +fontconfig headless-awt javafx jce nsplugin selinux source visualvm"
 REQUIRED_USE="javafx? ( alsa fontconfig )"
 
 RESTRICT="fetch preserve-libs strip"
@@ -264,8 +264,8 @@ src_install() {
 	# provided, they generally lag behind what Gentoo has available.
 	rm -vf jre/lib/*/libavplugin* || die
 
-	# We package this as dev-util/visualvm.
-	rm -vfr lib/visualvm || die
+	# Packaged as dev-util/visualvm but some users prefer this version.
+	use visualvm || find -name "*visualvm*" -exec rm -vfr {} + || die
 
 	dodoc COPYRIGHT
 	dodir "${dest}"
