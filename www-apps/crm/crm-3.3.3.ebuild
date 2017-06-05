@@ -1,22 +1,62 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-apps/redmine/redmine-1.4.1.ebuild,v 1.1 2012/04/25 15:02:00 matsuu Exp $
 
-EAPI="5"
-USE_RUBY="ruby18 jruby ruby19 ruby20"
+EAPI=5
+# ^ Ruby eclasses doesn't support EAPI6 yet
+USE_RUBY="ruby21 ruby22 ruby23"
+# ruby24"
+# ^ rails 4.2 does not support ruby24 yet.
+# To be added in next release.
 
 inherit eutils depend.apache user ruby-ng
 
-DESCRIPTION="Redmine is a flexible project management web application written using Ruby on Rails framework"
-HOMEPAGE="http://www.redmine.org/"
-SRC_URI="http://www.redmine.org/releases/redmine-${PV}.tar.gz"
+DESCRIPTION="Flexible project management webapp written using Ruby on Rails framework"
+HOMEPAGE="https://www.redmine.org/"
+SRC_URI="https://www.redmine.org/releases/redmine-${PV}.tar.gz"
 
 KEYWORDS="~amd64 ~x86"
 LICENSE="GPL-2"
 SLOT="0"
 IUSE="bazaar cvs darcs fastcgi git imagemagick mercurial mysql passenger postgres sqlite3 subversion ldap"
 
-RDEPEND="|| ( $(ruby_implementation_depend ruby18 '>=' -1.8.7)[ssl] $(ruby_implementation_depend ruby19)[ssl] $(ruby_implementation_depend ruby20)[ssl] )"
+RDEPEND="
+	|| (
+		$(ruby_implementation_depend ruby21)[ssl]
+		$(ruby_implementation_depend ruby22)[ssl]
+		$(ruby_implementation_depend ruby23)[ssl]
+	)
+"
+#		$(ruby_implementation_depend ruby24)[ssl]
+
+ruby_add_rdepend "
+	dev-ruby/bundler
+	virtual/rubygems
+	passenger? (
+		|| (
+			www-apache/passenger
+			www-servers/nginx[nginx_modules_http_passenger]
+		)
+	)
+	fastcgi? (
+		dev-ruby/fcgi
+	)
+"
+
+RDEPEND="
+	${RDEPEND}
+	imagemagick? ( media-gfx/imagemagick )
+	postgres? ( dev-db/postgresql )
+	sqlite3? ( dev-db/sqlite:3 )
+	mysql? ( virtual/mysql )
+	bazaar? ( dev-vcs/bzr )
+	cvs? ( >=dev-vcs/cvs-1.12 )
+	darcs? ( dev-vcs/darcs )
+	git? ( dev-vcs/git )
+	mercurial? ( dev-vcs/mercurial )
+	subversion? ( >=dev-vcs/subversion-1.3 )
+"
+
+REDMINE_DIR="${REDMINE_DIR:-/var/lib/${PN}}"
 
 src_unpack() {
 	if [ "${A}" != "" ]; then
@@ -26,40 +66,6 @@ src_unpack() {
 	fi
 }
 
-ruby_add_rdepend "
-	dev-ruby/bundler
-	virtual/rubygems
-	passenger? ( || ( www-apache/passenger www-servers/nginx[nginx_modules_http_passenger] ) )
-	fastcgi? (
-		dev-ruby/fcgi
-		ruby_targets_ruby19? (
-			>=dev-ruby/fcgi-0.9.1
-		)
-		ruby_targets_ruby20? (
-			>=dev-ruby/fcgi-0.9.1
-		)
-	)
-"
-
-#ruby_add_bdepend ">=dev-ruby/rdoc-2.4.2
-#	test? (
-#		>=dev-ruby/shoulda-2.10.3
-#		>=dev-ruby/edavis10-object_daddy
-#		>=dev-ruby/mocha
-#	)"
-
-RDEPEND="${RDEPEND}
-	postgres? ( dev-db/postgresql-base )
-	sqlite3? ( dev-db/sqlite:3 )
-	mysql? ( virtual/mysql )
-	bazaar? ( dev-vcs/bzr )
-	cvs? ( >=dev-vcs/cvs-1.12 )
-	darcs? ( dev-vcs/darcs )
-	git? ( dev-vcs/git )
-	mercurial? ( dev-vcs/mercurial )
-	subversion? ( >=dev-vcs/subversion-1.3 )"
-
-REDMINE_DIR="${REDMINE_DIR:-/var/lib/${PN}}"
 
 pkg_setup() {
 	enewgroup "${HTTPD_GROUP:-redmine}"
@@ -82,7 +88,7 @@ all_ruby_install() {
 
 	use ldap || (
 		rm app/models/auth_source_ldap.rb
-		epatch "${FILESDIR}/no_ldap-${PV}.patch"
+		epatch "${FILESDIR}/no_ldap.patch"
 	)
 	dodoc doc/{CHANGELOG,INSTALL,README_FOR_APP,RUNNING_TESTS,UPGRADING} || die
 	rm -r doc || die
