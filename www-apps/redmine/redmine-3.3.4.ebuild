@@ -1,13 +1,16 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-apps/redmine/redmine-1.4.1.ebuild,v 1.1 2012/04/25 15:02:00 matsuu Exp $
 
-EAPI="5"
-USE_RUBY="ruby18 jruby ruby19 ruby20 ruby21"
+EAPI=5
+# ^ Ruby eclasses doesn't support EAPI6 yet
+USE_RUBY="ruby22"
+# ruby24"
+# ^ rails 4.2 does not support ruby24 yet.
+# To be added in next release.
 
 inherit eutils depend.apache user ruby-ng
 
-DESCRIPTION="Redmine is a flexible project management web application written using Ruby on Rails framework"
+DESCRIPTION="Flexible project management webapp written using Ruby on Rails framework"
 HOMEPAGE="http://www.redmine.org/"
 SRC_URI="http://www.redmine.org/releases/${P}.tar.gz"
 
@@ -16,12 +19,24 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="bazaar cvs darcs fastcgi git imagemagick mercurial mysql passenger postgres sqlite3 subversion ldap"
 
-RDEPEND="|| ( $(ruby_implementation_depend ruby18 '>=' -1.8.7)[ssl] $(ruby_implementation_depend ruby19)[ssl] $(ruby_implementation_depend ruby20)[ssl] $(ruby_implementation_depend ruby21)[ssl] )"
+RDEPEND="
+	|| (
+		$(ruby_implementation_depend ruby21)[ssl]
+		$(ruby_implementation_depend ruby22)[ssl]
+		$(ruby_implementation_depend ruby23)[ssl]
+	)
+"
+#		$(ruby_implementation_depend ruby24)[ssl]
 
 ruby_add_rdepend "
 	dev-ruby/bundler
 	virtual/rubygems
-	passenger? ( || ( www-apache/passenger www-servers/nginx[nginx_modules_http_passenger] ) )
+	passenger? (
+		|| (
+			www-apache/passenger
+			www-servers/nginx[nginx_modules_http_passenger]
+		)
+	)
 	fastcgi? (
 		dev-ruby/fcgi
 	)
@@ -64,7 +79,7 @@ all_ruby_install() {
 
 	use ldap || (
 		rm app/models/auth_source_ldap.rb
-		epatch "${FILESDIR}/no_ldap-${PV}.patch"
+		epatch "${FILESDIR}/no_ldap.patch"
 	)
 	dodoc doc/{CHANGELOG,INSTALL,README_FOR_APP,RUNNING_TESTS,UPGRADING} || die
 	rm -r doc || die

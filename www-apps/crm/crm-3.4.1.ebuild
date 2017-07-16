@@ -1,27 +1,39 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: This ebuild is from mva overlay; $
 
-EAPI="5"
-USE_RUBY="ruby20 ruby21 ruby22"
+EAPI=5
+# ^ Ruby eclasses doesn't support EAPI6 yet
+USE_RUBY="ruby22"
 
 inherit eutils depend.apache user ruby-ng
 
-DESCRIPTION="Redmine is a flexible project management web application written using Ruby on Rails framework"
-HOMEPAGE="http://www.redmine.org/"
-SRC_URI="http://www.redmine.org/releases/${P}.tar.gz"
+DESCRIPTION="Flexible project management webapp written using Ruby on Rails framework"
+HOMEPAGE="https://www.redmine.org/"
+SRC_URI="https://www.redmine.org/releases/redmine-${PV}.tar.gz"
 
 KEYWORDS="~amd64 ~x86"
 LICENSE="GPL-2"
 SLOT="0"
 IUSE="bazaar cvs darcs fastcgi git imagemagick mercurial mysql passenger postgres sqlite3 subversion ldap"
 
-RDEPEND="|| ( $(ruby_implementation_depend ruby20)[ssl] $(ruby_implementation_depend ruby21)[ssl] $(ruby_implementation_depend ruby22)[ssl] )"
+RDEPEND="
+	|| (
+		$(ruby_implementation_depend ruby21)[ssl]
+		$(ruby_implementation_depend ruby22)[ssl]
+		$(ruby_implementation_depend ruby23)[ssl]
+	)
+"
+#		$(ruby_implementation_depend ruby24)[ssl]
 
 ruby_add_rdepend "
 	dev-ruby/bundler
 	virtual/rubygems
-	passenger? ( || ( www-apache/passenger www-servers/nginx[nginx_modules_http_passenger] ) )
+	passenger? (
+		|| (
+			www-apache/passenger
+			www-servers/nginx[nginx_modules_http_passenger]
+		)
+	)
 	fastcgi? (
 		dev-ruby/fcgi
 	)
@@ -42,6 +54,15 @@ RDEPEND="
 "
 
 REDMINE_DIR="${REDMINE_DIR:-/var/lib/${PN}}"
+
+src_unpack() {
+	if [ "${A}" != "" ]; then
+		unpack ${A}
+		mkdir all
+		mv redmine-${PV} all/crm-${PV}
+	fi
+}
+
 
 pkg_setup() {
 	enewgroup "${HTTPD_GROUP:-redmine}"
