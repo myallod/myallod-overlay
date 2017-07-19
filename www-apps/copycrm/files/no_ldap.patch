@@ -1,0 +1,11 @@
+--- lib/redmine.rb~	2017-07-16 19:12:36.635590445 +0300
++++ lib/redmine.rb	2017-07-16 20:14:22.616366395 +0300
+@@ -242,8 +242,6 @@
+             :html => {:class => 'icon icon-list'}
+   menu.push :settings, {:controller => 'settings'},
+             :html => {:class => 'icon icon-settings'}
+-  menu.push :ldap_authentication, {:controller => 'auth_sources', :action => 'index'},
+-            :html => {:class => 'icon icon-server-authentication'}
+   menu.push :plugins, {:controller => 'admin', :action => 'plugins'}, :last => true,
+             :html => {:class => 'icon icon-plugins'}
+   menu.push :info, {:controller => 'admin', :action => 'info'}, :caption => :label_information_plural, :last => true,
