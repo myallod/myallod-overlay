@@ -62,6 +62,7 @@ REDMINE_DIR="/srv/${PN}"
 src_unpack() {
 	if [ "${A}" != "" ]; then
 		unpack ${A}
+		mv redmine-${PV}/Gemfile redmine-${PV}/Gemfile.dist
 		mkdir all
 		mv redmine-${PV} all/myredmine-${PV}
 	fi
