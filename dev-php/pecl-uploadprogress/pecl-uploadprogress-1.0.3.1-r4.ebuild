@@ -1,10 +1,9 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
-USE_PHP="php5-6 php7-0"
+USE_PHP="php5-6 php7-0 php7-1 php7-2"
 
 inherit php-ext-pecl-r3
 
@@ -13,13 +12,6 @@ LICENSE="PHP-3.01"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
-
-for target in ${USE_PHP}; do
-	slot=${target/php}
-	slot=${slot/-/.}
-	PHPUSEDEPEND="${PHPUSEDEPEND}
-	php_targets_${target}? ( dev-lang/php:${slot} )"
-done
 
 RDEPEND="${PHPUSEDEPEND}"
 PATCHES=( "${FILESDIR}/1.0.3.1-php7.patch" )
