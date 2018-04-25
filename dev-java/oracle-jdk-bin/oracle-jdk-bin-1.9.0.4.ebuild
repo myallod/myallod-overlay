@@ -9,10 +9,10 @@ inherit eutils java-vm-2 prefix versionator
 JDK_URI="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
 JCE_URI="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"
 
-#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u74-b02" "8u77-b03""8u102-b14" "8u112-b15" "8u121-b13""8u131-b11")
-DLP="8u144-b01"
-#DLH="e9e7ea248e2c4826b92b3f075a80e441" "d54c1d3a095b4ff2b6607d096fa80163")
-DLH="090f390dda5b47b9b721c7dfaa008135"
+#DLP=("8u51-b16" "8u72-b15" "8u74-b02" "8u74-b02" "8u77-b03""8u102-b14" "8u112-b15" "8u121-b13" "8u131-b11" "8u144-b01" )
+DLP="8u152-b16"
+#DLH="e9e7ea248e2c4826b92b3f075a80e441" "d54c1d3a095b4ff2b6607d096fa80163" "090f390dda5b47b9b721c7dfaa008135" )
+DLH="aa0333dd3019491ca4f6ddbe78cdb6d0"
 
 # This is a list of archs supported by this update.
 # Currently arm comes and goes.
@@ -64,7 +64,7 @@ SRC_URI+=" jce? ( ${JCE_FILE} )"
 
 LICENSE="Oracle-BCLA-JavaSE examples? ( BSD )"
 SLOT="1.8"
-KEYWORDS="amd64 ~arm ~arm64 x86 ~amd64-linux ~x86-linux ~x64-macos ~sparc64-solaris ~x64-solaris"
+KEYWORDS="~amd64 ~x86 ~amd64-linux ~x86-linux"
 IUSE="alsa commercial cups derby doc examples +fontconfig headless-awt javafx jce nsplugin selinux source visualvm"
 REQUIRED_USE="javafx? ( alsa fontconfig )"
 
@@ -163,11 +163,11 @@ pkg_nofetch() {
 	for d in "${AT_AVAILABLE[@]}"; do
 		p=$(eval "echo \${$(echo AT_${d/-/_})}")
 		pf="${DISTDIR}/${p}"
-		test -f ${pf} || (einfo "/usr/bin/wget -O ${pf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}/${DLH}/${p} && chown portage:portage ${pf}")
+		test -f ${pf} || (einfo "/usr/bin/wget -O ${pf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}/${DLH}/${p} && chown portage:portage ${pf}";)
 		if has ${d} "${DEMOS_AVAILABLE[@]}"; then
 			dem=$(eval "echo \${$(echo DEMOS_${d/-/_})}")
 			demf="${DISTDIR}/${dem}"
-			test -f ${demf} || (einfo "/usr/bin/wget -O ${demf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}-demos/${DLH}/${dem} && chown portage:portage ${demf}")
+			test -f ${demf} || (einfo "/usr/bin/wget -O ${demf} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' https://download.oracle.com/otn-pub/java/jdk/${DLP}-demos/${DLH}/${dem} && chown portage:portage ${demf}";)
 		fi
 	done
 
