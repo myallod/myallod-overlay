@@ -1,18 +1,15 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-# ^ Ruby eclasses doesn't support EAPI6 yet
-USE_RUBY="ruby22"
-# ruby24"
-# ^ rails 4.2 does not support ruby24 yet.
-# To be added in next release.
+EAPI=6
+
+USE_RUBY="ruby23 ruby24 ruby25"
 
 inherit eutils depend.apache user ruby-ng
 
 DESCRIPTION="Flexible project management webapp written using Ruby on Rails framework"
-HOMEPAGE="http://www.redmine.org/"
-SRC_URI="http://www.redmine.org/releases/${P}.tar.gz"
+HOMEPAGE="https://www.redmine.org/"
+SRC_URI="https://www.redmine.org/releases/${P}.tar.gz"
 
 KEYWORDS="~amd64 ~x86"
 LICENSE="GPL-2"
@@ -21,13 +18,11 @@ IUSE="bazaar cvs darcs fastcgi git imagemagick mercurial mysql passenger postgre
 
 RDEPEND="
 	|| (
-		$(ruby_implementation_depend ruby21)[ssl]
-		$(ruby_implementation_depend ruby22)[ssl]
 		$(ruby_implementation_depend ruby23)[ssl]
+		$(ruby_implementation_depend ruby24)[ssl]
+		$(ruby_implementation_depend ruby25)[ssl]
 	)
 "
-#		$(ruby_implementation_depend ruby24)[ssl]
-
 ruby_add_rdepend "
 	dev-ruby/bundler
 	virtual/rubygems
@@ -77,6 +72,8 @@ all_ruby_install() {
 	REDMINE_USER="${HTTPD_USER:-redmine}"
 	REDMINE_GROUP="${HTTPD_GROUP:-redmine}"
 
+	local REDMINE_LOGDIR="/var/log/${PN}"
+
 	use ldap || (
 		rm app/models/auth_source_ldap.rb
 		epatch "${FILESDIR}/no_ldap.patch"
@@ -86,8 +83,8 @@ all_ruby_install() {
 	dodoc README.rdoc || die
 	rm README.rdoc || die
 
-	keepdir /var/log/${PN} || die
-	dosym /var/log/${PN}/ "${REDMINE_DIR}/log" || die
+	keepdir "${REDMINE_LOGDIR}" || die
+	dosym "${REDMINE_LOGDIR}" "${REDMINE_DIR}/log" || die
 
 	insinto "${REDMINE_DIR}"
 	doins -r . || die
@@ -99,7 +96,7 @@ all_ruby_install() {
 		"${REDMINE_DIR}/files" \
 		"${REDMINE_DIR}/public/plugin_assets" \
 		"${REDMINE_DIR}/tmp" \
-		/var/log/${PN} || die
+		"${REDMINE_LOGDIR}" || die
 	# for SCM
 	fowners "${REDMINE_USER}:${REDMINE_GROUP}" "${REDMINE_DIR}" || die
 	# bug #406605
@@ -107,7 +104,7 @@ all_ruby_install() {
 		"${REDMINE_DIR}/config" \
 		"${REDMINE_DIR}/files" \
 		"${REDMINE_DIR}/tmp" \
-		/var/log/${PN} || die
+		"${REDMINE_LOGDIR}" || die
 
 	if use passenger ; then
 		has_apache
