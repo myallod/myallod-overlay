@@ -322,6 +322,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/php-5.3.29-CVE-2014-3597.patch
 	epatch "${FILESDIR}"/php-5.3.29-CVE-2014-8142.patch
 	epatch "${FILESDIR}"/php-5.3.29-CVE-2015-0231.patch
+	epatch "${FILESDIR}"/php-5.3.29-CVE-2015-0232.patch
 
 	# Patch PHP to show Gentoo as the server platform
 	sed -e 's/PHP_UNAME=`uname -a | xargs`/PHP_UNAME=`uname -s -n -r -v | xargs`/g' \
