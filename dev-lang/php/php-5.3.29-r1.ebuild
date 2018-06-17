@@ -313,6 +313,15 @@ src_prepare() {
 	# Fix for freetype-2.5.1 bug #494272
 	epatch "${FILESDIR}"/freetype-2.5.1-linking-fix.patch
 
+	# Fix onigurama mbstring https://bugzilla.redhat.com/show_bug.cgi?id=1562583 http://git.php.net/?p=php-src.git;a=commitdiff;h=4072b2787074ee8e247a6639585b49e10c5a55fe
+	# files: php_mbregex.c
+	# Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1) (chrullrich, cmb)
+	epatch "${FILESDIR}"/php-5.3-oniguruma-6.8.patch
+
+	#CVE
+	epatch "${FILESDIR}"/php-5.3.29-CVE-2014-3597.patch
+	epatch "${FILESDIR}"/php-5.3.29-CVE-2014-8142.patch
+
 	# Patch PHP to show Gentoo as the server platform
 	sed -e 's/PHP_UNAME=`uname -a | xargs`/PHP_UNAME=`uname -s -n -r -v | xargs`/g' \
 		-i configure.in || die "Failed to fix server platform name"
