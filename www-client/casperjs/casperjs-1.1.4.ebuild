@@ -15,7 +15,11 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="www-client/phantomjs"
+DEPEND="|| (
+	www-client/phantomjs
+	www-client/phantomjs-static
+	)
+"
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/${PN}-${MY_PV}"
