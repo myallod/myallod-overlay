@@ -1,29 +1,28 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-misc/awstats/awstats-7.1.1.ebuild,v 1.1 2013/04/03 10:09:04 flameeyes Exp $
 
-EAPI=4
+EAPI=6
 
 inherit eutils
 
 MY_P=${PN}-${PV%_p*}
 
-DESCRIPTION="AWStats is short for Advanced Web Statistics."
+DESCRIPTION="AWStats is short for Advanced Web Statistics"
 HOMEPAGE="http://www.awstats.org/"
 
 if [ ${MY_P} != ${P} ]; then
-	SRC_URI="http://dev.gentoo.org/~flameeyes/awstats/${P}.tar.gz"
+	SRC_URI="https://dev.gentoo.org/~flameeyes/awstats/${P}.tar.gz"
 	# The following SRC_URI is useful only when fetching for the first time
 	# after bump; upstream does not bump the version when they change it, so
 	# we rename it to include the date and upload to our mirrors instead.
 	#SRC_URI="http://www.awstats.org/files/${MY_P}.tar.gz -> ${P}.tar.gz"
 else
-	SRC_URI="http://www.awstats.org/files/${P}.tar.gz"
+	SRC_URI="https://www.awstats.org/files/${P}.tar.gz"
 fi
 
 S=${WORKDIR}/${MY_P}
 
-LICENSE="GPL-2"
+LICENSE="GPL-3"
 KEYWORDS="~alpha ~amd64 ~hppa ~ppc ~sparc ~x86 ~x86-fbsd"
 IUSE="geoip ipv6"
 
@@ -37,7 +36,8 @@ RDEPEND=">=dev-lang/perl-5.6.1
 DEPEND=""
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-7.1-gentoo.diff
+	eapply "${FILESDIR}"/${PN}-7.1-gentoo.diff
+	epatch "${FILESDIR}"/${PN}-daily-patch.diff
 
 	# change default installation directory
 	find . -type f -exec sed \
@@ -65,11 +65,16 @@ src_prepare() {
 	fi
 
 	find "${S}" '(' -type f -not -name '*.pl' ')' -exec chmod -x {} + || die
+
+	eapply_user
 }
 
+HTML_DOCS="docs/"
+DOCS="README.md"
+
 src_install() {
-	dohtml -r docs/*
-	dodoc README.TXT
+	einstalldocs
+
 	newdoc wwwroot/cgi-bin/plugins/example/example.pm example_plugin.pm
 	dodoc -r tools/xslt
 
