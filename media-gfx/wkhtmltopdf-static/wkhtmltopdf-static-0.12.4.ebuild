@@ -7,8 +7,8 @@ inherit multilib eutils
 
 DESCRIPTION="Convert html to pdf (and various image formats) using webkit - static precompiled version"
 HOMEPAGE="http://wkhtmltopdf.org/ https://github.com/wkhtmltopdf/wkhtmltopdf/ http://wkhtmltopdf.org/downloads.html"
-SRC_URI="amd64? ( https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz )
-		x86? ( https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-i386.tar.xz )"
+SRC_URI="amd64? ( https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/${PV}/wkhtmltox-${PV}_linux-generic-amd64.tar.xz )
+		x86? ( https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/${PV}/wkhtmltox-${PV}_linux-generic-i386.tar.xz )"
 
 UNPACKDIR="wkhtmltox"
 
