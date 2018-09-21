@@ -1,9 +1,7 @@
 # Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
-
-inherit versionator
+EAPI=7
 
 DESCRIPTION="Lightweight log shipper for Logstash and Elasticsearch"
 HOMEPAGE="https://www.elastic.co/products/beats"
@@ -14,22 +12,22 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 RESTRICT="test"
 
-DEPEND=">=dev-lang/go-1.9.2"
+DEPEND=">=dev-lang/go-1.10.3"
 RDEPEND="!app-admin/filebeat-bin"
 
-ELASTIC="${WORKDIR}/src/github.com/elastic"
-BEATS="${ELASTIC}/beats"
-S="${BEATS}"
+# Do not complain about CFLAGS etc since go projects do not use them.
+QA_FLAGS_IGNORED='.*'
+
+S="${WORKDIR}/src/github.com/elastic/beats"
 
 src_unpack() {
-	mkdir -p "${ELASTIC}" || die
-	unpack ${P}.tar.gz
-	mv beats-${PV} "${BEATS}" || die
+	mkdir -p "${S%/*}" || die
+	default
+	mv beats-${PV} "${S}" || die
 }
 
 src_compile() {
-	cd ${BEATS}/filebeat || die
-	GOPATH="${WORKDIR}" emake
+	GOPATH="${WORKDIR}" emake -C "${S}/filebeat"
 }
 
 src_install() {
@@ -59,7 +57,7 @@ src_install() {
 pkg_postinst() {
 	if [[ -n "${REPLACING_VERSIONS}" ]]; then
 		elog "Please read the migration guide at:"
-		elog "https://www.elastic.co/guide/en/beats/libbeat/$(get_version_component_range 1-2)/upgrading.html"
+		elog "https://www.elastic.co/guide/en/beats/libbeat/$(ver_cut 1-2)/upgrading.html"
 		elog ""
 	fi
 
