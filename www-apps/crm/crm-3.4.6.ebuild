@@ -1,29 +1,25 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-# ^ Ruby eclasses doesn't support EAPI6 yet
-USE_RUBY="ruby22"
+EAPI=6
+USE_RUBY="ruby24 ruby25"
+inherit eutils depend.apache ruby-ng user
 
-inherit eutils depend.apache user ruby-ng
-
-DESCRIPTION="Flexible project management webapp written using Ruby on Rails framework"
+DESCRIPTION="Flexible project management web application using the Ruby on Rails framework"
 HOMEPAGE="https://www.redmine.org/"
 SRC_URI="https://www.redmine.org/releases/redmine-${PV}.tar.gz"
 
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64"
 LICENSE="GPL-2"
 SLOT="0"
 IUSE="bazaar cvs darcs fastcgi git imagemagick mercurial mysql passenger postgres sqlite3 subversion ldap"
 
 RDEPEND="
 	|| (
-		$(ruby_implementation_depend ruby21)[ssl]
-		$(ruby_implementation_depend ruby22)[ssl]
-		$(ruby_implementation_depend ruby23)[ssl]
+		$(ruby_implementation_depend ruby24)[ssl]
+		$(ruby_implementation_depend ruby25)[ssl]
 	)
 "
-#		$(ruby_implementation_depend ruby24)[ssl]
 
 ruby_add_rdepend "
 	dev-ruby/bundler
