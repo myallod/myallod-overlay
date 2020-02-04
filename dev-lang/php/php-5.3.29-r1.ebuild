@@ -325,6 +325,11 @@ src_prepare() {
 	epatch "${FILESDIR}"/php-5.3.29-CVE-2015-0232.patch
 
 	epatch "${FILESDIR}"/php-5.3.3-CVE-2014-2497.patch
+	epatch "${FILESDIR}"/php-5.3.3-CVE-2014-3587.patch
+	epatch "${FILESDIR}"/php-5.3.3-CVE-2014-3668.patch
+	epatch "${FILESDIR}"/php-5.3.3-CVE-2014-3669.patch
+	epatch "${FILESDIR}"/php-5.3.3-CVE-2014-3670.patch
+
 
 
 	# Patch PHP to show Gentoo as the server platform
