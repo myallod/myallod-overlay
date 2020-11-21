@@ -1,0 +1,26 @@
+
+https://www.ubnt.com/download/mfi/default/default/mfi-user-guide
+	https://www.ubnt.com/downloads/guides/mfi/mFi_User_Guide_V11_10-25-12.pdf
+
+https://www.ubnt.com/download/mfi
+	http://dl.ubnt.com/mfi/2.1.11/mFi.unix.zip
+mFi 2.1.11 Controller for Linux
+
+http://community.ubnt.com/t5/mFi/bd-p/mFi
+	forum
+
+mFi - avoid java 8: 24.04.2015
+http://community.ubnt.com/t5/mFi/Installing-mFi-Avoid-Java-8/m-p/1237515#U1237515
+
+https://github.com/ITJamie/UBNT-MFI
+	Function to get information from UBNT(Ubiquiti) MFI Server
+
+https://github.com/acedrew/ubnt-mfi-py
+	Python API for Ubiquiti mFi gear.
+
+https://github.com/dansimpson/mfi
+	Gem for integrating with mFi devices over SSH.
+
+
+https://github.com/jasperla/puppet-mfi
+https://github.com/darconeous/docker-mfi-controller
