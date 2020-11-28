@@ -1,6 +1,6 @@
---- lib/redmine.rb~	2017-07-16 19:12:36.635590445 +0300
-+++ lib/redmine.rb	2017-07-16 20:14:22.616366395 +0300
-@@ -242,8 +242,6 @@
+--- a/lib/redmine.rb	2020-11-21 22:22:26.751115318 +0300
++++ b/lib/redmine.rb	2020-11-21 22:39:03.792476944 +0300
+@@ -265,8 +265,6 @@
              :html => {:class => 'icon icon-list'}
    menu.push :settings, {:controller => 'settings'},
              :html => {:class => 'icon icon-settings'}
