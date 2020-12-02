@@ -1,7 +1,7 @@
 # Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
 
 inherit webapp
 
@@ -40,6 +40,12 @@ RDEPEND="
 need_httpd_cgi
 
 REQUIRED_USE="|| ( mysql postgres sqlite )"
+
+src_prepare() {
+	eapply "${FILESDIR}/${PV}-2978575-290.patch"
+	#eapply "${FILESDIR}/${PV}-mysql8_no_auto_create_user_only.patch"
+	eapply_user
+}
 
 src_install() {
 	webapp_src_preinst
