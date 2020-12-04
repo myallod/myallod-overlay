@@ -3,7 +3,7 @@
 
 EAPI=7
 
-USE_RUBY="ruby24 ruby25 ruby26"
+USE_RUBY="ruby25 ruby26"
 
 inherit eutils ruby-ng
 
@@ -48,6 +48,10 @@ REDMINE_DIR="${REDMINE_DIR:-/var/lib/${PN}}"
 
 all_ruby_prepare() {
 	rm -r log files/delete.me || die
+
+	# bug #724464
+	sed -i -e "s/gem 'rails',.*/gem 'rails', '~>5.2.4'/" Gemfile || die
+	sed -i -e "s/if File.exists/if File.exist/" Gemfile || die
 
 	echo "CONFIG_PROTECT=\"${EPREFIX}${REDMINE_DIR}/config\"" > "${T}/50${PN}"
 	echo "CONFIG_PROTECT_MASK=\"${EPREFIX}${REDMINE_DIR}/config/locales ${EPREFIX}${REDMINE_DIR}/config/settings.yml\"" >> "${T}/50${PN}"
@@ -105,6 +109,12 @@ all_ruby_install() {
 }
 
 pkg_postinst() {
+	einfo
+	einfo "Run if any:"
+	einfo "/var/lib/redmine # ruby -v bin/bundle update"
+	einfo "/var/lib/redmine # rails console -e production"
+	einfo "/var/lib/redmine # RAILS_ENV=production ruby -v bin/rake db:migrate"
+	einfo "/var/lib/redmine # RAILS_ENV=production ruby -v bin/rake redmine:plugins"
 	einfo
 	if [ -e "${EPREFIX}${REDMINE_DIR}/config/initializers/session_store.rb" ] ; then
 		elog "Execute the following command to upgrade environment:"
