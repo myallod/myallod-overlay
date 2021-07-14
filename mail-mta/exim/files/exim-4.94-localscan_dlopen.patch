@@ -1,7 +1,20 @@
-diff -Naur exim-4.32/src/EDITME exim-4.32-dlopen/src/EDITME
---- src/EDITME	2004-04-15 08:27:01.000000000 +0000
-+++ src/EDITME	2004-05-06 16:15:47.000000000 +0000
-@@ -505,6 +505,24 @@
+diff -ur exim-4.92.orig/src/config.h.defaults exim-4.92/src/config.h.defaults
+--- exim-4.92.orig/src/config.h.defaults	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/config.h.defaults	2019-02-16 18:17:24.547216157 +0100
+@@ -32,6 +32,8 @@
+ 
+ #define AUTH_VARS                     3
+ 
++#define DLOPEN_LOCAL_SCAN
++
+ #define BIN_DIRECTORY
+ 
+ #define CONFIGURE_FILE
+Only in exim-4.92/src: config.h.defaults.orig
+diff -ur exim-4.92.orig/src/EDITME exim-4.92/src/EDITME
+--- exim-4.92.orig/src/EDITME	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/EDITME	2019-02-16 18:17:24.547216157 +0100
+@@ -824,6 +824,24 @@
  
  
  #------------------------------------------------------------------------------
@@ -10,7 +23,7 @@ diff -Naur exim-4.32/src/EDITME exim-4.32-dlopen/src/EDITME
 +# to be recompiled with the desired local_scan function. For a full
 +# description of the API to this function, see the Exim specification.
 +
-+DLOPEN_LOCAL_SCAN=yes
++#DLOPEN_LOCAL_SCAN=yes
 +
 +# If you set DLOPEN_LOCAL_SCAN, then you need to include -rdynamic in the
 +# linker flags.  Without it, the loaded .so won't be able to access any
@@ -26,53 +39,44 @@ diff -Naur exim-4.32/src/EDITME exim-4.32-dlopen/src/EDITME
  # The default distribution of Exim contains only the plain text form of the
  # documentation. Other forms are available separately. If you want to install
  # the documentation in "info" format, first fetch the Texinfo documentation
-diff -Naur exim-4.32/src/config.h.defaults exim-4.32-dlopen/src/config.h.defaults
---- src/config.h.defaults	2004-04-15 08:27:01.000000000 +0000
-+++ src/config.h.defaults	2004-05-06 16:16:30.000000000 +0000
-@@ -20,6 +20,8 @@
- #define AUTH_PLAINTEXT
- #define AUTH_SPA
+Only in exim-4.92/src: EDITME.orig
+diff -ur exim-4.92.orig/src/globals.c exim-4.92/src/globals.c
+--- exim-4.92.orig/src/globals.c	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/globals.c	2019-02-16 18:17:24.549216150 +0100
+@@ -41,6 +41,10 @@
  
-+#define DLOPEN_LOCAL_SCAN
-+
- #define BIN_DIRECTORY
- 
- #define CONFIGURE_FILE
-diff -Naur exim-4.32/src/globals.c exim-4.32-dlopen/src/globals.c
---- src/globals.c	2004-04-15 08:27:01.000000000 +0000
-+++ src/globals.c	2004-05-06 16:17:07.000000000 +0000
-@@ -109,6 +109,10 @@
- uschar *tls_verify_hosts       = NULL;
- #endif
+ uschar *no_aliases             = NULL;
  
 +#ifdef DLOPEN_LOCAL_SCAN
 +uschar *local_scan_path        = NULL;
 +#endif
 +
  
- /* Input-reading functions for messages, so we can use special ones for
- incoming TCP/IP. The defaults use stdin. We never need these for any
-diff -Naur exim-4.32/src/globals.h exim-4.32-dlopen/src/globals.h
---- src/globals.h	2004-04-15 08:27:01.000000000 +0000
-+++ src/globals.h	2004-05-06 16:17:50.000000000 +0000
-@@ -73,6 +73,9 @@
- extern uschar *tls_verify_hosts;       /* Mandatory client verification */
- #endif
+ /* For comments on these variables, see globals.h. I'm too idle to
+ duplicate them here... */
+Only in exim-4.92/src: globals.c.orig
+diff -ur exim-4.92.orig/src/globals.h exim-4.92/src/globals.h
+--- exim-4.92.orig/src/globals.h	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/globals.h	2019-02-16 18:17:24.549216150 +0100
+@@ -152,6 +152,9 @@
+ extern int (*receive_ferror)(void);
+ extern BOOL (*receive_smtp_buffered)(void);
  
 +#ifdef DLOPEN_LOCAL_SCAN
 +extern uschar *local_scan_path;        /* Path to local_scan() library */
 +#endif
  
- /* Input-reading functions for messages, so we can use special ones for
- incoming TCP/IP. */
-diff -Naur exim-4.32/src/local_scan.c exim-4.32-dlopen/src/local_scan.c
---- src/local_scan.c	2004-04-15 08:27:01.000000000 +0000
-+++ src/local_scan.c	2004-05-06 16:21:57.000000000 +0000
-@@ -5,60 +5,131 @@
- /* Copyright (c) University of Cambridge 1995 - 2004 */
+ /* For clearing, saving, restoring address expansion variables. We have to have
+ the size of this vector set explicitly, because it is referenced from more than
+Only in exim-4.92/src: globals.h.orig
+diff -ur exim-4.92.orig/src/local_scan.c exim-4.92/src/local_scan.c
+--- exim-4.92.orig/src/local_scan.c	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/local_scan.c	2019-02-16 18:29:56.832732592 +0100
+@@ -5,61 +5,133 @@
+ /* Copyright (c) University of Cambridge 1995 - 2009 */
  /* See the file NOTICE for conditions of use and distribution. */
  
-+#include "exim.h"
++#include "local_scan.h"
  
 -/******************************************************************************
 -This file contains a template local_scan() function that just returns ACCEPT.
@@ -80,6 +84,7 @@ diff -Naur exim-4.32/src/local_scan.c exim-4.32-dlopen/src/local_scan.c
 -Local/local_scan.c, and edit the copy. To use your version instead of the
 -default, you must set
 -
+-HAVE_LOCAL_SCAN=yes
 -LOCAL_SCAN_SOURCE=Local/local_scan.c
 -
 -in your Local/Makefile. This makes it easy to copy your version for use with
@@ -121,9 +126,11 @@ diff -Naur exim-4.32/src/local_scan.c exim-4.32-dlopen/src/local_scan.c
 -                   is used in the rejection message.
 -*/
 +#ifdef DLOPEN_LOCAL_SCAN
++#include <stdlib.h>
 +#include <dlfcn.h>
 +static int (*local_scan_fn)(int fd, uschar **return_text) = NULL;
 +static int load_local_scan_library(void);
++extern uschar *local_scan_path;        /* Path to local_scan() library */
 +#endif
  
  int
@@ -247,16 +254,16 @@ diff -Naur exim-4.32/src/local_scan.c exim-4.32-dlopen/src/local_scan.c
 +#endif /* DLOPEN_LOCAL_SCAN */
 +
  /* End of local_scan.c */
-diff -Naur exim-4.32/src/readconf.c exim-4.32-dlopen/src/readconf.c
---- src/readconf.c	2004-04-15 08:27:01.000000000 +0000
-+++ src/readconf.c	2004-05-06 16:23:12.000000000 +0000
-@@ -223,6 +223,9 @@
-   { "local_from_prefix",        opt_stringptr,   &local_from_prefix },
-   { "local_from_suffix",        opt_stringptr,   &local_from_suffix },
-   { "local_interfaces",         opt_stringptr,   &local_interfaces },
+diff -ur exim-4.92.orig/src/readconf.c exim-4.92/src/readconf.c
+--- exim-4.92.orig/src/readconf.c	2019-01-30 14:59:52.000000000 +0100
++++ exim-4.92/src/readconf.c	2019-02-16 18:18:46.013947455 +0100
+@@ -205,6 +205,9 @@
+   { "local_from_prefix",        opt_stringptr,   {&local_from_prefix} },
+   { "local_from_suffix",        opt_stringptr,   {&local_from_suffix} },
+   { "local_interfaces",         opt_stringptr,   {&local_interfaces} },
 +#ifdef DLOPEN_LOCAL_SCAN
-+  { "local_scan_path",          opt_stringptr,   &local_scan_path },
++  { "local_scan_path",          opt_stringptr,   {&local_scan_path} },
 +#endif
-   { "local_scan_timeout",       opt_time,        &local_scan_timeout },
-   { "local_sender_retain",      opt_bool,        &local_sender_retain },
-   { "localhost_number",         opt_stringptr,   &host_number_string },
+ #ifdef HAVE_LOCAL_SCAN
+   { "local_scan_timeout",       opt_time,        {&local_scan_timeout} },
+ #endif

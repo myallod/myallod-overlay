@@ -1,54 +1,66 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/mail-mta/exim/exim-4.85.ebuild,v 1.6 2015-06-16 07:45:20 ago Exp $
 
-EAPI="5"
+EAPI="6"
 
 inherit eutils toolchain-funcs multilib pam systemd
 
-IUSE="dcc +dkim dlfunc dmarc +dnsdb doc dovecot-sasl dsn exiscan-acl gnutls ipv6 ldap lmtp maildir mbx mysql nis pam perl pkcs11 postgres +prdr proxy radius redis sasl selinux spf sqlite srs ssl syslog tcpd tpda X"
-REQUIRED_USE="spf? ( exiscan-acl ) srs? ( exiscan-acl ) dmarc? ( spf dkim ) pkcs11? ( gnutls )"
+IUSE="dane dcc +dkim dlfunc dmarc +dnsdb doc dovecot-sasl dsn exiscan-acl gnutls ipv6 ldap libressl lmtp maildir mbx mysql nis pam perl pkcs11 postgres +prdr proxy radius redis sasl selinux spf sqlite srs ssl syslog tcpd +tpda X elibc_glibc"
+REQUIRED_USE="
+	dane? ( ssl !gnutls )
+	dmarc? ( spf dkim )
+	pkcs11? ( ssl gnutls )
+	spf? ( exiscan-acl )
+	srs? ( exiscan-acl )
+"
 
 COMM_URI="ftp://ftp.exim.org/pub/exim/exim4$([[ ${PV} == *_rc* ]] && echo /test)"
 
 DESCRIPTION="A highly configurable, drop-in replacement for sendmail"
 SRC_URI="${COMM_URI}/${P//rc/RC}.tar.bz2
 	mirror://gentoo/system_filter.exim.gz
-	doc? ( ${COMM_URI}/${PN}-html-${PV//rc/RC}.tar.bz2 )"
+	doc? ( ${COMM_URI}/${PN}-pdf-${PV//rc/RC}.tar.bz2 )"
 HOMEPAGE="http://www.exim.org/"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~alpha amd64 hppa ~ia64 ~ppc ~ppc64 ~sparc x86 ~x86-fbsd ~x86-solaris"
+KEYWORDS="alpha amd64 arm hppa ia64 ppc ppc64 sparc x86 ~x86-fbsd ~x86-solaris"
 
 COMMON_DEPEND=">=sys-apps/sed-4.0.5
-	>=sys-libs/db-3.2
+	>=sys-libs/db-3.2:=
 	dev-libs/libpcre
 	dev-libs/libxml2
-	perl? ( sys-devel/libperl )
+	perl? ( dev-lang/perl:= )
 	pam? ( virtual/pam )
 	tcpd? ( sys-apps/tcp-wrappers )
-	ssl? ( dev-libs/openssl )
+	ssl? (
+		!libressl? ( dev-libs/openssl:0= )
+		libressl? ( dev-libs/libressl:= )
+	)
 	gnutls? ( net-libs/gnutls[pkcs11?]
 			  dev-libs/libtasn1 )
 	ldap? ( >=net-nds/openldap-2.0.7 )
-	mysql? ( virtual/mysql )
-	postgres? ( dev-db/postgresql-base )
+	nis? ( elibc_glibc? ( || (
+		<sys-libs/glibc-2.23
+		>=sys-libs/glibc-2.23[rpc]
+	) ) )
+	mysql? ( virtual/libmysqlclient )
+	postgres? ( dev-db/postgresql:= )
 	sasl? ( >=dev-libs/cyrus-sasl-2.1.26-r2 )
 	redis? ( dev-libs/hiredis )
-	selinux? ( sec-policy/selinux-exim )
 	spf? ( >=mail-filter/libspf2-1.2.5-r1 )
 	dmarc? ( mail-filter/opendmarc )
 	srs? ( mail-filter/libsrs_alt )
-	X? ( x11-proto/xproto
+	X? (
 		x11-libs/libX11
 		x11-libs/libXmu
 		x11-libs/libXt
 		x11-libs/libXaw
 	)
 	sqlite? ( dev-db/sqlite )
-	radius? ( net-dialup/radiusclient )
+	radius? ( net-dialup/freeradius-client )
 	virtual/libiconv
+	elibc_glibc? ( net-libs/libnsl )
 	"
 	# added X check for #57206
 DEPEND="${COMMON_DEPEND}
@@ -71,6 +83,7 @@ RDEPEND="${COMMON_DEPEND}
 	>=net-mail/mailbase-0.00-r5
 	virtual/logger
 	dcc? ( mail-filter/dcc )
+	selinux? ( sec-policy/selinux-exim )
 	"
 
 S=${WORKDIR}/${P//rc/RC}
@@ -81,15 +94,17 @@ src_prepare() {
 	epatch "${FILESDIR}"/exim-4.69-r1.27021.patch
 	epatch "${FILESDIR}"/exim-4.74-radius-db-ENV-clash.patch # 287426
 	epatch "${FILESDIR}"/exim-4.82-makefile-freebsd.patch # 235785
-	epatch "${FILESDIR}"/exim-4.77-as-needed-ldflags.patch # 352265, 391279
+	epatch "${FILESDIR}"/exim-4.89-as-needed-ldflags.patch # 352265, 391279
 	epatch "${FILESDIR}"/exim-4.76-crosscompile.patch # 266591
 
 	if use maildir ; then
 		epatch "${FILESDIR}"/exim-4.20-maildir.patch
-		epatch "${FILESDIR}"/exim-m2k-4.85.patch
+		epatch "${FILESDIR}"/exim-m2k-90-r1.patch
 	else
 		epatch "${FILESDIR}"/exim-4.80-spool-mail-group.patch # 438606
 	fi
+
+	eapply_user
 
 	# user Exim believes it should be
 	MAILUSER=mail
@@ -117,6 +132,11 @@ src_configure() {
 		-e "s:COMPRESS_COMMAND=.*$:COMPRESS_COMMAND=${EPREFIX}/bin/gzip:" \
 		src/EDITME > Local/Makefile
 
+	if use elibc_musl; then
+		sed -e 's/^LIBS = -lnsl/LIBS =/g' \
+		-i OS/Makefile-Linux
+	fi
+
 	cd Local
 
 	cat >> Makefile <<- EOC
@@ -127,7 +147,8 @@ src_configure() {
 	EOC
 
 	# if we use libiconv, now is the time to tell so
-	use !elibc_glibc && echo "EXTRALIBS_EXIM=-liconv" >> Makefile
+	use !elibc_glibc && use !elibc_musl && \
+		echo "EXTRALIBS_EXIM=-liconv" >> Makefile
 
 	# support for IPv6
 	if use ipv6; then
@@ -161,11 +182,12 @@ src_configure() {
 	#
 	# lookup methods
 
-	# use the "native" interface to the DBM library, support passwd
-	# and directory lookups by default
+	# use the "native" interfaces to the DBM and CDB libraries, support
+	# passwd and directory lookups by default
 	cat >> Makefile <<- EOC
 		USE_DB=yes
 		DBMLIB=-ldb
+		LOOKUP_CDB=yes
 		LOOKUP_PASSWD=yes
 		LOOKUP_DSEARCH=yes
 	EOC
@@ -179,7 +201,7 @@ src_configure() {
 		cat >> Makefile <<- EOC
 			LOOKUP_LDAP=yes
 			LDAP_LIB_TYPE=OPENLDAP2
-			LOOKUP_INCLUDE += -I${EROOT}usr/include/ldap
+			LOOKUP_INCLUDE += -I"${EROOT}"usr/include/ldap
 			LOOKUP_LIBS += -lldap -llber
 		EOC
 	fi
@@ -216,7 +238,7 @@ src_configure() {
 
 	if use redis; then
 		cat >> Makefile <<- EOC
-			EXPERIMENTAL_REDIS=yes
+			LOOKUP_REDIS=yes
 			LOOKUP_LIBS += -lhiredis
 		EOC
 	fi
@@ -237,7 +259,6 @@ src_configure() {
 	if use exiscan-acl; then
 		cat >> Makefile <<- EOC
 			WITH_CONTENT_SCAN=yes
-			WITH_OLD_DEMIME=yes
 		EOC
 	fi
 
@@ -254,6 +275,14 @@ src_configure() {
 		# PRDR is enabled by default
 		cat >> Makefile <<- EOC
 			DISABLE_PRDR=yes
+		EOC
+	fi
+
+	# Transport post-delivery actions
+	if ! use tpda; then
+		# EVENT is enabled by default
+		cat >> Makefile <<- EOC
+			DISABLE_EVENT=yes
 		EOC
 	fi
 
@@ -310,8 +339,22 @@ src_configure() {
 		EOC
 	fi
 
+	# Proxy Protocol
+	if use proxy; then
+		cat >> Makefile <<- EOC
+			SUPPORT_PROXY=yes
+		EOC
+	fi
+
 	#
 	# experimental features
+
+	# DANE
+	if use dane; then
+		cat >> Makefile <<- EOC
+			EXPERIMENTAL_DANE=yes
+		EOC
+	fi
 
 	# Distributed Checksum Clearinghouse
 	if use dcc; then
@@ -342,24 +385,10 @@ src_configure() {
 		EOC
 	fi
 
-	# Transport post-delivery actions
-	if use tpda; then
-		cat >> Makefile <<- EOC
-			EXPERIMENTAL_TPDA=yes
-		EOC
-	fi
-
-	# Proxy Protocol
-	if use proxy; then
-		cat >> Makefile <<- EOC
-			EXPERIMENTAL_PROXY=yes
-		EOC
-	fi
-
-	# Delivery Sender Notifications
+	# Delivery Sender Notifications extra information in fail message
 	if use dsn; then
 		cat >> Makefile <<- EOC
-			EXPERIMENTAL_DSN=yes
+			EXPERIMENTAL_DSN_INFO=yes
 		EOC
 	fi
 
@@ -401,53 +430,49 @@ src_configure() {
 	if use radius; then
 		cat >> Makefile <<- EOC
 			RADIUS_CONFIG_FILE=${EPREFIX}/etc/radiusclient/radiusclient.conf
-			RADIUS_LIB_TYPE=RADIUSCLIENT
-			AUTH_LIBS += -lradiusclient
+			RADIUS_LIB_TYPE=RADIUSCLIENTNEW
+			AUTH_LIBS += -lfreeradius-client
 		EOC
 	fi
 }
 
 src_compile() {
-	emake -j1 CC="$(tc-getCC)" HOSTCC="$(tc-getCC $CBUILD)" \
+	emake CC="$(tc-getCC)" HOSTCC="$(tc-getCC $CBUILD)" \
 		AR="$(tc-getAR) cq" RANLIB="$(tc-getRANLIB)" FULLECHO='' \
 		|| die "make failed"
 }
 
 src_install () {
-	cd "${S}"/build-exim-gentoo
-	exeinto /usr/sbin
-	doexe exim
+	cd "${S}"/build-exim-gentoo || die
+	dosbin exim
 	if use X; then
-		doexe eximon.bin
-		doexe eximon
+		dosbin eximon.bin
+		dosbin eximon
 	fi
 	fperms 4755 /usr/sbin/exim
-
-	dodir /usr/bin /usr/sbin /usr/lib
 
 	dosym exim /usr/sbin/sendmail
 	dosym exim /usr/sbin/rsmtp
 	dosym exim /usr/sbin/rmail
-	dosym /usr/sbin/exim /usr/bin/mailq
-	dosym /usr/sbin/exim /usr/bin/newaliases
-	dosym /usr/sbin/sendmail /usr/lib/sendmail
+	dosym ../sbin/exim /usr/bin/mailq
+	dosym ../sbin/exim /usr/bin/newaliases
+	dosym ../sbin/sendmail /usr/lib/sendmail
 
-	exeinto /usr/sbin
 	for i in exicyclog exim_dbmbuild exim_dumpdb exim_fixdb exim_lock \
 		exim_tidydb exinext exiwhat exigrep eximstats exiqsumm exiqgrep \
 		convert4r3 convert4r4 exipick
 	do
-		doexe $i
+		dosbin $i
 	done
 
 	dodoc "${S}"/doc/*
 	doman "${S}"/doc/exim.8
 	use dsn && dodoc "${S}"/README.DSN
-	use doc && dohtml -r "${WORKDIR}"/${PN}-html-${PV//rc/RC}/doc/html/spec_html/*
+	use doc && dodoc "${WORKDIR}"/${PN}-pdf-${PV//rc/RC}/doc/*.pdf
 
 	# conf files
 	insinto /etc/exim
-	newins "${S}"/src/configure.default.orig exim.conf.dist
+	newins "${S}"/src/configure.default exim.conf.dist
 	if use exiscan-acl; then
 		newins "${S}"/src/configure.default exim.conf.exiscan-acl
 	fi
@@ -469,14 +494,14 @@ src_install () {
 	insinto /etc/logrotate.d
 	newins "${FILESDIR}/exim.logrotate" exim
 
-	newinitd "${FILESDIR}"/exim.rc8 exim
+	newinitd "${FILESDIR}"/exim.rc10 exim
 	newconfd "${FILESDIR}"/exim.confd exim
 
 	systemd_dounit "${FILESDIR}"/{exim.service,exim.socket,exim-submission.socket}
 	systemd_newunit "${FILESDIR}"/exim_at.service 'exim@.service'
 	systemd_newunit "${FILESDIR}"/exim-submission_at.service 'exim-submission@.service'
 
-	DIROPTIONS="-m 0750 -o ${MAILUSER} -g ${MAILGROUP}"
+	diropts -m 0750 -o ${MAILUSER} -g ${MAILGROUP}
 	dodir /var/log/${PN}
 }
 
@@ -486,6 +511,7 @@ pkg_postinst() {
 		einfo "${EROOT}etc/exim/auth_conf.sub contains the configuration sub for using smtp auth."
 		einfo "Please create ${EROOT}etc/exim/exim.conf from ${EROOT}etc/exim/exim.conf.dist."
 	fi
+	use dane && einfo "DANE support is experimental"
 	if use dcc ; then
 		einfo "DCC support is experimental, you can find some limited"
 		einfo "documentation at the bottom of this prerelease message:"
@@ -498,16 +524,7 @@ pkg_postinst() {
 		einfo "configure DMARC, for usage see the documentation at "
 		einfo "experimental-spec.txt."
 	fi
-	use tpda && einfo "TPDA support is experimental"
-	use proxy && einfo "proxy support is experimental"
-	if use dsn ; then
-		einfo "Starting from Exim 4.83, DSN support comes from upstream."
-		einfo "DSN support is an experimental feature.  If you used DSN"
-		einfo "support prior to 4.83, make sure to remove all dsn_process"
-		einfo "switches from your routers, see http://bugs.gentoo.org/511818"
-	fi
-	einfo "Exim maintains some db files under its spool directory that need"
-	einfo "cleaning from time to time.  (${EROOT}var/spool/exim/db)"
-	einfo "Please use the exim_tidydb tool as documented in the Exim manual:"
-	einfo "http://www.exim.org/exim-html-current/doc/html/spec_html/ch-exim_utilities.html#SECThindatmai"
+	use dsn && einfo "extra information in fail DSN message is experimental"
+	elog "The obsolete acl condition 'demime' is removed, the replacements"
+	elog "are the ACLs acl_smtp_mime and acl_not_smtp_mime"
 }
